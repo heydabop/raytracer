@@ -20,14 +20,14 @@ impl Ray {
     }
 
     pub fn color(&self) -> Vec3 {
-        if self.hit_sphere(&Vec3(0.0, 0.0, -1.0), 0.5) {
-            return Vec3(1.0, 0.0, 0.0);
+        if self.hit_sphere(&Vec3::init(0.0, 0.0, -1.0), 0.5) {
+            return Vec3::init(1.0, 0.0, 0.0);
         }
 
         let unit_direction = self.direction.unit_vector();
-        let t = 0.5 * (unit_direction.1 + 1.0);
+        let t = 0.5 * (unit_direction.y + 1.0);
 
-        Vec3(1.0, 1.0, 1.0) * (1.0 - t) + Vec3(0.5, 0.7, 1.0) * t
+        Vec3::init(1.0, 1.0, 1.0) * (1.0 - t) + Vec3::init(0.5, 0.7, 1.0) * t
     }
 
     fn hit_sphere(&self, center: &Vec3, radius: f64) -> bool {
@@ -48,10 +48,10 @@ mod test {
     #[test]
     fn at() {
         let a = Ray {
-            origin: Vec3(0.0, -1.0, -2.0),
-            direction: Vec3(1.0, 2.0, 3.0),
+            origin: Vec3::init(0.0, -1.0, -2.0),
+            direction: Vec3::init(1.0, 2.0, 3.0),
         };
         let b = &a.at(2.5);
-        assert_eq!(b, &Vec3(2.5, 4.0, 5.5));
+        assert_eq!(b, &Vec3::init(2.5, 4.0, 5.5));
     }
 }

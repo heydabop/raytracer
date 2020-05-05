@@ -14,9 +14,10 @@ fn main() {
     println!("P3\n{} {}\n255", image_width, image_height);
 
     let origin = Vec3::new();
-    let horizontal = Vec3(4.0, 0.0, 0.0);
-    let vertical = Vec3(0.0, 2.25, 0.0);
-    let lower_left_corner = &origin - &(&horizontal / 2.0) - &vertical / 2.0 - Vec3(0.0, 0.0, 1.0);
+    let horizontal = Vec3::init(4.0, 0.0, 0.0);
+    let vertical = Vec3::init(0.0, 2.25, 0.0);
+    let lower_left_corner =
+        &origin - &(&horizontal / 2.0) - &vertical / 2.0 - Vec3::init(0.0, 0.0, 1.0);
 
     let mut stdout = io::stdout();
 
