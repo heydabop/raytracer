@@ -1,7 +1,6 @@
 use super::hit::{Hit, HitData, Hittable};
 use super::ray::Ray;
 use super::vec3::Vec3;
-use std::default::Default;
 
 pub struct Sphere {
     pub center: Vec3,

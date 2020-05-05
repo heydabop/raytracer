@@ -1,6 +1,5 @@
 use super::hit::{Hit, Hittable};
 use super::vec3::Vec3;
-use std::default::Default;
 
 #[derive(Debug, PartialEq)]
 pub struct Ray {

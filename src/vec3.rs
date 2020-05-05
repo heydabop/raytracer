@@ -1,4 +1,3 @@
-use std::default::Default;
 use std::fmt;
 use std::ops;
 
@@ -327,7 +326,7 @@ mod test {
     fn dot() {
         let a = Vec3::init(1.0, 2.0, 3.0);
         let b = Vec3::init(4.0, 5.0, 6.0);
-        assert!((a.dot(&b) - 32.0).abs() < std::f64::EPSILON);
+        assert!((a.dot(&b) - 32.0).abs() < f64::EPSILON);
     }
 
     #[test]
@@ -394,22 +393,22 @@ mod test {
     #[test]
     fn rgb() {
         let a = Vec3::init(1.0, 2.0, 3.0);
-        assert!((a.r() - 1.0).abs() < std::f64::EPSILON);
-        assert!((a.g() - 2.0).abs() < std::f64::EPSILON);
-        assert!((a.b() - 3.0).abs() < std::f64::EPSILON);
+        assert!((a.r() - 1.0).abs() < f64::EPSILON);
+        assert!((a.g() - 2.0).abs() < f64::EPSILON);
+        assert!((a.b() - 3.0).abs() < f64::EPSILON);
     }
 
     #[test]
     fn index() {
         let mut a = Vec3::init(4.0, 5.0, 6.0);
-        assert!((a[0] - 4.0).abs() < std::f64::EPSILON);
-        assert!((a[1] - 5.0).abs() < std::f64::EPSILON);
-        assert!((a[2] - 6.0).abs() < std::f64::EPSILON);
+        assert!((a[0] - 4.0).abs() < f64::EPSILON);
+        assert!((a[1] - 5.0).abs() < f64::EPSILON);
+        assert!((a[2] - 6.0).abs() < f64::EPSILON);
         a[0] = 7.0;
         a[1] = 8.0;
         a[2] = 9.0;
-        assert!((a[0] - 7.0).abs() < std::f64::EPSILON);
-        assert!((a[1] - 8.0).abs() < std::f64::EPSILON);
-        assert!((a[2] - 9.0).abs() < std::f64::EPSILON);
+        assert!((a[0] - 7.0).abs() < f64::EPSILON);
+        assert!((a[1] - 8.0).abs() < f64::EPSILON);
+        assert!((a[2] - 9.0).abs() < f64::EPSILON);
     }
 }
