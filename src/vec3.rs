@@ -4,9 +4,6 @@ use std::ops;
 #[derive(Debug, PartialEq)]
 pub struct Vec3(pub f64, pub f64, pub f64);
 
-pub type Point3 = Vec3;
-pub type Color = Vec3;
-
 impl Vec3 {
     pub const fn new() -> Self {
         Self(0.0, 0.0, 0.0)
@@ -44,6 +41,15 @@ impl Vec3 {
 
     pub fn unit_vector(&self) -> Self {
         self / self.length()
+    }
+
+    pub fn ppm_pixel(self) -> String {
+        format!(
+            "{} {} {}\n",
+            (255.999 * self.0) as u8,
+            (255.999 * self.1) as u8,
+            (255.999 * self.2) as u8
+        )
     }
 }
 
