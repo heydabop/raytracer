@@ -1,10 +1,13 @@
 mod hit;
 mod ppm;
 mod ray;
+mod scene;
 mod sphere;
 mod vec3;
 
 use ray::Ray;
+use scene::Scene;
+use sphere::Sphere;
 use std::io::{self, Write};
 use vec3::Vec3;
 
@@ -22,6 +25,16 @@ fn main() {
     let lower_left_corner =
         &origin - &(&horizontal / 2.0) - &vertical / 2.0 - Vec3::init(0.0, 0.0, 1.0);
 
+    let mut scene = Scene::new();
+    scene.add(Box::new(Sphere {
+        center: Vec3::init(0.0, 0.0, -1.0),
+        radius: 0.5,
+    }));
+    scene.add(Box::new(Sphere {
+        center: Vec3::init(0.0, -100.5, -1.0),
+        radius: 100.0,
+    }));
+
     let mut colors: Vec<Vec<Vec3>> = vec![];
 
     for j in (0..image_height).rev() {
@@ -37,7 +50,7 @@ fn main() {
                 origin: origin.clone(),
                 direction: &lower_left_corner + &horizontal * u + &vertical * v,
             };
-            row.push(r.color());
+            row.push(r.color(&scene));
         }
         colors.push(row);
     }

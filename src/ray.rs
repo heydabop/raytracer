@@ -1,5 +1,4 @@
 use super::hit::{Hit, Hittable};
-use super::sphere::Sphere;
 use super::vec3::Vec3;
 use std::default::Default;
 
@@ -22,27 +21,13 @@ impl Ray {
         &self.origin + &self.direction * t
     }
 
-    pub fn color(&self) -> Vec3 {
-        let s = &Sphere {
-            center: Vec3::init(0.0, 0.0, -1.0),
-            radius: 0.5,
-        };
-        let hit = &s.hit(self, 0.0, 10.0);
-        if let Hit::Hit {
-            point: _,
-            normal,
-            t: _,
-            front_face: _,
-        } = hit
-        {
-            return Vec3::init(normal.x + 1.0, normal.y + 1.0, normal.z + 1.0) * 0.5;
+    pub fn color<T: Hittable>(&self, hittable: &T) -> Vec3 {
+        if let Hit::Hit(hit) = hittable.hit(self, 0.0, f64::INFINITY) {
+            return (hit.normal + Vec3::init(1.0, 1.0, 1.0)) * 0.5;
         }
-
-        // miss; return background gradient
 
         let unit_direction = self.direction.unit_vector();
         let t = 0.5 * (unit_direction.y + 1.0);
-
         Vec3::init(1.0, 1.0, 1.0) * (1.0 - t) + Vec3::init(0.5, 0.7, 1.0) * t
     }
 }

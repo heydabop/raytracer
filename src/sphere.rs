@@ -1,4 +1,4 @@
-use super::hit::{Hit, Hittable};
+use super::hit::{Hit, HitData, Hittable};
 use super::ray::Ray;
 use super::vec3::Vec3;
 use std::default::Default;
@@ -26,12 +26,12 @@ impl Sphere {
         } else {
             true
         };
-        Hit::Hit {
+        Hit::Hit(HitData {
             point,
             normal,
             t,
             front_face,
-        }
+        })
     }
 }
 
@@ -41,7 +41,7 @@ impl Default for Sphere {
     }
 }
 
-impl Hittable for &Sphere {
+impl Hittable for Sphere {
     fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Hit {
         let oc = &r.origin - &self.center;
         let a = r.direction.length_squared();
@@ -65,10 +65,16 @@ impl Hittable for &Sphere {
     }
 }
 
+impl Hittable for &Sphere {
+    fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Hit {
+        (*self).hit(r, t_min, t_max)
+    }
+}
+
 #[cfg(test)]
 #[allow(clippy::unreadable_literal)]
 mod test {
-    use super::{Hit, Hittable, Ray, Sphere, Vec3};
+    use super::{Hit, HitData, Hittable, Ray, Sphere, Vec3};
 
     #[test]
     fn hit() {
@@ -90,7 +96,7 @@ mod test {
         };
         assert_eq!(
             s.hit(&hit_ray, 0.0, 2.0),
-            Hit::Hit {
+            Hit::Hit(HitData {
                 point: Vec3 {
                     x: 0.10787389667339242,
                     y: 0.16181084501008863,
@@ -103,11 +109,11 @@ mod test {
                 },
                 t: 0.5393694833669621,
                 front_face: true,
-            }
+            })
         );
         assert_eq!(
             s.hit(&inside_hit_ray, 0.0, 1.0),
-            Hit::Hit {
+            Hit::Hit(HitData {
                 point: Vec3 {
                     x: 0.0,
                     y: 0.5,
@@ -120,7 +126,7 @@ mod test {
                 },
                 t: 0.5,
                 front_face: false,
-            }
+            })
         );
         assert_eq!(s.hit(&hit_ray, 0.0, 0.5), Hit::Miss);
         assert_eq!(s.hit(&miss_ray, 0.0, 10.0), Hit::Miss);

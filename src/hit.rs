@@ -1,14 +1,18 @@
 use super::ray::Ray;
 use super::vec3::Vec3;
 
+#[allow(clippy::module_name_repetitions)]
+#[derive(Debug, PartialEq)]
+pub struct HitData {
+    pub point: Vec3,
+    pub normal: Vec3,
+    pub t: f64,
+    pub front_face: bool,
+}
+
 #[derive(Debug, PartialEq)]
 pub enum Hit {
-    Hit {
-        point: Vec3,
-        normal: Vec3,
-        t: f64,
-        front_face: bool,
-    },
+    Hit(HitData),
     Miss,
 }
 
