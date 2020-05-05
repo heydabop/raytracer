@@ -21,24 +21,32 @@ impl Ray {
     }
 
     pub fn color(&self) -> Vec3 {
-        if self.hit_sphere(&Vec3::init(0.0, 0.0, -1.0), 0.5) {
-            return Vec3::init(1.0, 0.0, 0.0);
+        let mut t = self.hit_sphere(&Vec3::init(0.0, 0.0, -1.0), 0.5);
+        if t > 0.0 {
+            let n = (&self.at(t) - &Vec3::init(0.0, 0.0, -1.0)).unit_vector();
+            return Vec3::init(n.x + 1.0, n.y + 1.0, n.z + 1.0) * 0.5;
         }
 
+        // miss; return background gradient
+
         let unit_direction = self.direction.unit_vector();
-        let t = 0.5 * (unit_direction.y + 1.0);
+        t = 0.5 * (unit_direction.y + 1.0);
 
         Vec3::init(1.0, 1.0, 1.0) * (1.0 - t) + Vec3::init(0.5, 0.7, 1.0) * t
     }
 
-    fn hit_sphere(&self, center: &Vec3, radius: f64) -> bool {
+    fn hit_sphere(&self, center: &Vec3, radius: f64) -> f64 {
         let oc = &self.origin - center;
-        let a = self.direction.dot(&self.direction);
-        let b = oc.dot(&self.direction) * 2.0;
-        let c = oc.dot(&oc) - radius * radius;
-        let discriminant = b * b - 4.0 * a * c;
+        let a = self.direction.length_squared();
+        let half_b = oc.dot(&self.direction);
+        let c = oc.length_squared() - radius * radius;
+        let discriminant = half_b * half_b - a * c;
 
-        discriminant > 0.0
+        if discriminant < 0.0 {
+            -1.0
+        } else {
+            (-half_b - discriminant.sqrt()) / a
+        }
     }
 }
 
