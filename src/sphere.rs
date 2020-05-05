@@ -1,4 +1,4 @@
-use super::hit::*;
+use super::hit::{Hit, Hittable};
 use super::ray::Ray;
 use super::vec3::Vec3;
 use std::default::Default;
@@ -57,6 +57,7 @@ impl Hittable for &Sphere {
 }
 
 #[cfg(test)]
+#[allow(clippy::unreadable_literal)]
 mod test {
     use super::{Hit, Hittable, Ray, Sphere, Vec3};
 

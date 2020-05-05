@@ -11,6 +11,7 @@ use vec3::Vec3;
 fn main() {
     let aspect_ratio = 16.0 / 9.0;
     let image_width: u16 = 1280;
+    #[allow(clippy::cast_sign_loss, clippy::cast_possible_truncation)]
     let image_height = (f64::from(image_width) / aspect_ratio).round() as u16;
 
     let mut stdout = io::stdout();

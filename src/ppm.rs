@@ -6,16 +6,19 @@ pub fn p3_header(width: u16, height: u16) -> String {
 }
 
 #[allow(dead_code)]
-pub fn p3_pixel(color: Vec3) -> String {
+pub fn p3_pixel(color: &Vec3) -> String {
     if !color.is_valid_color() {
         panic!("Color {} out of range", &color)
     }
-    format!(
-        "{} {} {}\n",
-        (255.999 * color.r()) as u8,
-        (255.999 * color.g()) as u8,
-        (255.999 * color.b()) as u8
-    )
+    #[allow(clippy::cast_sign_loss, clippy::cast_possible_truncation)]
+    {
+        format!(
+            "{} {} {}\n",
+            (255.999 * color.r()) as u8,
+            (255.999 * color.g()) as u8,
+            (255.999 * color.b()) as u8
+        )
+    }
 }
 
 #[allow(dead_code)]
@@ -32,9 +35,12 @@ pub fn p6_image(colors: &[Vec<Vec3>]) -> Vec<u8> {
             if !color.is_valid_color() {
                 panic!("Color {} out of range", &color)
             }
-            image.push((255.999 * color.r()) as u8);
-            image.push((255.999 * color.g()) as u8);
-            image.push((255.999 * color.b()) as u8);
+            #[allow(clippy::cast_sign_loss, clippy::cast_possible_truncation)]
+            {
+                image.push((255.999 * color.r()) as u8);
+                image.push((255.999 * color.g()) as u8);
+                image.push((255.999 * color.b()) as u8);
+            }
         }
     }
 
@@ -52,7 +58,7 @@ mod test {
 
     #[test]
     fn p3_pixel() {
-        assert_eq!(super::p3_pixel(Vec3::init(0.0, 0.77, 1.0)), "0 197 255\n");
+        assert_eq!(super::p3_pixel(&Vec3::init(0.0, 0.77, 1.0)), "0 197 255\n");
     }
 
     #[test]
