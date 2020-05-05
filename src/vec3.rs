@@ -5,6 +5,7 @@ use std::ops;
 pub struct Vec3(pub f64, pub f64, pub f64);
 
 impl Vec3 {
+    #[allow(dead_code)]
     pub const fn new() -> Self {
         Self(0.0, 0.0, 0.0)
     }
