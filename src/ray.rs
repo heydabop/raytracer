@@ -1,4 +1,4 @@
-use super::hit::*;
+use super::hit::{Hit, Hittable};
 use super::sphere::Sphere;
 use super::vec3::Vec3;
 use std::default::Default;

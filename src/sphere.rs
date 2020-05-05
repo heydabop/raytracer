@@ -55,3 +55,42 @@ impl Hittable for &Sphere {
         Hit::Miss
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::{Hit, Hittable, Ray, Sphere, Vec3};
+
+    #[test]
+    fn hit() {
+        let s = &Sphere {
+            center: Vec3::init(0.0, 0.0, 1.0),
+            radius: 0.5,
+        };
+        let hit_ray = Ray {
+            origin: Vec3::new(),
+            direction: Vec3::init(0.2, 0.3, 1.0),
+        };
+        let miss_ray = Ray {
+            origin: Vec3::new(),
+            direction: Vec3::init(0.0, 0.7, 1.0),
+        };
+        assert_eq!(
+            s.hit(&hit_ray, 0.0, 2.0),
+            Hit::Hit {
+                point: Vec3 {
+                    x: 0.10787389667339242,
+                    y: 0.16181084501008863,
+                    z: 0.5393694833669621
+                },
+                normal: Vec3 {
+                    x: 0.21574779334678484,
+                    y: 0.32362169002017727,
+                    z: -0.9212610332660758
+                },
+                t: 0.5393694833669621
+            }
+        );
+        assert_eq!(s.hit(&hit_ray, 0.0, 0.5), Hit::Miss);
+        assert_eq!(s.hit(&miss_ray, 0.0, 10.0), Hit::Miss);
+    }
+}
