@@ -76,6 +76,12 @@ impl Vec3 {
     }
 }
 
+impl fmt::Display for &Vec3 {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "({} {} {})", self.x, self.y, self.z)
+    }
+}
+
 impl ops::Add for &Vec3 {
     type Output = Vec3;
 
@@ -134,9 +140,40 @@ impl ops::DivAssign<f64> for Vec3 {
     }
 }
 
-impl fmt::Display for &Vec3 {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "({} {} {})", self.x, self.y, self.z)
+impl ops::Index<u8> for &Vec3 {
+    type Output = f64;
+
+    fn index(&self, index: u8) -> &Self::Output {
+        match index {
+            0 => &self.x,
+            1 => &self.y,
+            2 => &self.z,
+            _ => panic!("Index {} out of bounds", index),
+        }
+    }
+}
+
+impl ops::Index<u8> for Vec3 {
+    type Output = f64;
+
+    fn index(&self, index: u8) -> &Self::Output {
+        match index {
+            0 => &self.x,
+            1 => &self.y,
+            2 => &self.z,
+            _ => panic!("Index {} out of bounds", index),
+        }
+    }
+}
+
+impl ops::IndexMut<u8> for Vec3 {
+    fn index_mut(&mut self, index: u8) -> &mut Self::Output {
+        match index {
+            0 => &mut self.x,
+            1 => &mut self.y,
+            2 => &mut self.z,
+            _ => panic!("Index {} out of bounds", index),
+        }
     }
 }
 
@@ -361,5 +398,19 @@ mod test {
         assert_eq!(a.r(), 1.0);
         assert_eq!(a.g(), 2.0);
         assert_eq!(a.b(), 3.0);
+    }
+
+    #[test]
+    fn index() {
+        let mut a = Vec3::init(4.0, 5.0, 6.0);
+        assert_eq!(a[0], 4.0);
+        assert_eq!(a[1], 5.0);
+        assert_eq!(a[2], 6.0);
+        a[0] = 7.0;
+        a[1] = 8.0;
+        a[2] = 9.0;
+        assert_eq!(a[0], 7.0);
+        assert_eq!(a[1], 8.0);
+        assert_eq!(a[2], 9.0);
     }
 }
