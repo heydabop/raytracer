@@ -1,3 +1,4 @@
+use std::default::Default;
 use std::fmt;
 use std::ops;
 
@@ -64,6 +65,12 @@ impl Vec3 {
 
     pub fn unit_vector(&self) -> Self {
         self / self.length()
+    }
+}
+
+impl Default for Vec3 {
+    fn default() -> Self {
+        Vec3::new()
     }
 }
 

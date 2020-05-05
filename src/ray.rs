@@ -1,4 +1,5 @@
 use super::vec3::Vec3;
+use std::default::Default;
 
 #[derive(Debug, PartialEq)]
 pub struct Ray {
@@ -38,6 +39,12 @@ impl Ray {
         let discriminant = b * b - 4.0 * a * c;
 
         discriminant > 0.0
+    }
+}
+
+impl Default for Ray {
+    fn default() -> Self {
+        Ray::new()
     }
 }
 
