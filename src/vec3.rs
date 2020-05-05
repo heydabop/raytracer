@@ -62,6 +62,14 @@ impl ops::Add for &Vec3 {
     }
 }
 
+impl ops::Add for Vec3 {
+    type Output = Vec3;
+
+    fn add(self, rhs: Self) -> Self::Output {
+        &self + &rhs
+    }
+}
+
 impl ops::AddAssign<&Vec3> for Vec3 {
     fn add_assign(&mut self, rhs: &Vec3) {
         self.0 += rhs.0;
@@ -75,6 +83,14 @@ impl ops::Div<f64> for &Vec3 {
 
     fn div(self, rhs: f64) -> Self::Output {
         self * (1.0 / rhs)
+    }
+}
+
+impl ops::Div<f64> for Vec3 {
+    type Output = Vec3;
+
+    fn div(self, rhs: f64) -> Self::Output {
+        &self / rhs
     }
 }
 
@@ -98,11 +114,27 @@ impl ops::Mul for &Vec3 {
     }
 }
 
+impl ops::Mul for Vec3 {
+    type Output = Vec3;
+
+    fn mul(self, rhs: Self) -> Self::Output {
+        &self * &rhs
+    }
+}
+
 impl ops::Mul<f64> for &Vec3 {
     type Output = Vec3;
 
     fn mul(self, rhs: f64) -> Self::Output {
         Vec3(self.0 * rhs, self.1 * rhs, self.2 * rhs)
+    }
+}
+
+impl ops::Mul<f64> for Vec3 {
+    type Output = Vec3;
+
+    fn mul(self, rhs: f64) -> Self::Output {
+        &self * rhs
     }
 }
 
@@ -122,11 +154,27 @@ impl ops::Neg for &Vec3 {
     }
 }
 
+impl ops::Neg for Vec3 {
+    type Output = Vec3;
+
+    fn neg(self) -> Self::Output {
+        -&self
+    }
+}
+
 impl ops::Sub for &Vec3 {
     type Output = Vec3;
 
     fn sub(self, rhs: Self) -> Self::Output {
         Vec3(self.0 - rhs.0, self.1 - rhs.1, self.2 - rhs.2)
+    }
+}
+
+impl ops::Sub for Vec3 {
+    type Output = Vec3;
+
+    fn sub(self, rhs: Self) -> Self::Output {
+        &self - &rhs
     }
 }
 
@@ -147,7 +195,10 @@ mod test {
         let a = Vec3(1.0, 2.0, 3.0);
         let b = Vec3(4.0, 5.0, 6.0);
         let c = &a + &b;
-        assert_eq!(c, Vec3(5.0, 7.0, 9.0));
+        let d = a + b;
+        let res = Vec3(5.0, 7.0, 9.0);
+        assert_eq!(c, res);
+        assert_eq!(d, res);
     }
 
     #[test]
@@ -170,7 +221,10 @@ mod test {
     fn div() {
         let a = Vec3(1.0, 2.0, 3.0);
         let b = &a / 2.0;
-        assert_eq!(b, Vec3(0.5, 1.0, 1.5));
+        let c = a / 2.0;
+        let res = Vec3(0.5, 1.0, 1.5);
+        assert_eq!(b, res);
+        assert_eq!(c, res);
     }
 
     #[test]
@@ -198,14 +252,20 @@ mod test {
         let a = Vec3(1.0, 2.0, 3.0);
         let b = Vec3(4.0, 5.0, 6.0);
         let c = &a * &b;
-        assert_eq!(c, Vec3(4.0, 10.0, 18.0));
+        let d = a * b;
+        let res = Vec3(4.0, 10.0, 18.0);
+        assert_eq!(c, res);
+        assert_eq!(d, res);
     }
 
     #[test]
     fn mul_f64() {
         let a = Vec3(1.0, 2.0, 3.0);
         let b = &a * 2.0;
-        assert_eq!(b, Vec3(2.0, 4.0, 6.0));
+        let c = a * 2.0;
+        let res = Vec3(2.0, 4.0, 6.0);
+        assert_eq!(b, res);
+        assert_eq!(c, res);
     }
 
     #[test]
@@ -218,7 +278,9 @@ mod test {
     #[test]
     fn neg() {
         let a = Vec3(1.0, 2.0, 3.0);
-        assert_eq!(-&a, Vec3(-1.0, -2.0, -3.0));
+        let res = Vec3(-1.0, -2.0, -3.0);
+        assert_eq!(-&a, res);
+        assert_eq!(-a, res);
     }
 
     #[test]
@@ -226,7 +288,10 @@ mod test {
         let a = Vec3(1.0, 2.0, 3.0);
         let b = Vec3(1.0, 3.0, 5.0);
         let c = &a - &b;
-        assert_eq!(c, Vec3(0.0, -1.0, -2.0));
+        let d = a - b;
+        let res = Vec3(0.0, -1.0, -2.0);
+        assert_eq!(c, res);
+        assert_eq!(d, res);
     }
 
     #[test]
