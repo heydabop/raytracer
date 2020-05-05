@@ -43,7 +43,7 @@ impl Ray {
 
 #[cfg(test)]
 mod test {
-    use super::*;
+    use super::{Ray, Vec3};
 
     #[test]
     fn at() {

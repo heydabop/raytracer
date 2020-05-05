@@ -35,11 +35,11 @@ impl Vec3 {
 
     pub fn is_valid_color(&self) -> bool {
         0.0 <= self.x
-            && self.x < 256.0
+            && self.x <= 1.0
             && 0.0 <= self.y
-            && self.y < 256.0
+            && self.y <= 1.0
             && 0.0 <= self.z
-            && self.z < 256.0
+            && self.z <= 1.0
     }
 
     pub fn length(&self) -> f64 {
@@ -67,6 +67,9 @@ impl Vec3 {
     }
 
     pub fn ppm_pixel(self) -> String {
+        if !self.is_valid_color() {
+            panic!("Color {} out of range", &self)
+        }
         format!(
             "{} {} {}\n",
             (255.999 * self.x) as u8,
@@ -275,7 +278,7 @@ impl ops::SubAssign<&Vec3> for Vec3 {
 
 #[cfg(test)]
 mod test {
-    use super::*;
+    use super::Vec3;
 
     #[test]
     fn add() {
