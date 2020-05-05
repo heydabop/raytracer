@@ -18,10 +18,19 @@ impl Sphere {
 
     fn compute_hit(&self, r: &Ray, t: f64) -> Hit {
         let point = r.at(t);
+        let mut normal = (&point - &self.center) / self.radius;
+        let front_face = if r.direction.dot(&normal) > 0.0 {
+            // ray is coming from inside the sphere
+            normal = -normal;
+            false
+        } else {
+            true
+        };
         Hit::Hit {
-            point: point.clone(),
-            normal: (&point - &self.center) / self.radius,
+            point,
+            normal,
             t,
+            front_face,
         }
     }
 }
@@ -71,6 +80,10 @@ mod test {
             origin: Vec3::new(),
             direction: Vec3::init(0.2, 0.3, 1.0),
         };
+        let inside_hit_ray = Ray {
+            origin: Vec3::init(0.0, 0.0, 1.0),
+            direction: Vec3::init(0.0, 1.0, 0.0),
+        };
         let miss_ray = Ray {
             origin: Vec3::new(),
             direction: Vec3::init(0.0, 0.7, 1.0),
@@ -88,7 +101,25 @@ mod test {
                     y: 0.32362169002017727,
                     z: -0.9212610332660758
                 },
-                t: 0.5393694833669621
+                t: 0.5393694833669621,
+                front_face: true,
+            }
+        );
+        assert_eq!(
+            s.hit(&inside_hit_ray, 0.0, 1.0),
+            Hit::Hit {
+                point: Vec3 {
+                    x: 0.0,
+                    y: 0.5,
+                    z: 1.0,
+                },
+                normal: Vec3 {
+                    x: 0.0,
+                    y: -1.0,
+                    z: 0.0,
+                },
+                t: 0.5,
+                front_face: false,
             }
         );
         assert_eq!(s.hit(&hit_ray, 0.0, 0.5), Hit::Miss);

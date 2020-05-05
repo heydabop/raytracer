@@ -3,7 +3,12 @@ use super::vec3::Vec3;
 
 #[derive(Debug, PartialEq)]
 pub enum Hit {
-    Hit { point: Vec3, normal: Vec3, t: f64 },
+    Hit {
+        point: Vec3,
+        normal: Vec3,
+        t: f64,
+        front_face: bool,
+    },
     Miss,
 }
 

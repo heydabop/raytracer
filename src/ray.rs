@@ -32,6 +32,7 @@ impl Ray {
             point: _,
             normal,
             t: _,
+            front_face: _,
         } = hit
         {
             return Vec3::init(normal.x + 1.0, normal.y + 1.0, normal.z + 1.0) * 0.5;
