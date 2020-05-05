@@ -1,7 +1,7 @@
 use std::fmt;
 use std::ops;
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Vec3(pub f64, pub f64, pub f64);
 
 impl Vec3 {
@@ -67,6 +67,14 @@ impl ops::Add for Vec3 {
 
     fn add(self, rhs: Self) -> Self::Output {
         &self + &rhs
+    }
+}
+
+impl ops::Add<Vec3> for &Vec3 {
+    type Output = Vec3;
+
+    fn add(self, rhs: Vec3) -> Self::Output {
+        self + &rhs
     }
 }
 
@@ -194,11 +202,14 @@ mod test {
     fn add() {
         let a = Vec3(1.0, 2.0, 3.0);
         let b = Vec3(4.0, 5.0, 6.0);
-        let c = &a + &b;
-        let d = a + b;
+        let c = b.clone();
+        let d = &a + &b;
+        let e = &a + b;
+        let f = a + c;
         let res = Vec3(5.0, 7.0, 9.0);
-        assert_eq!(c, res);
         assert_eq!(d, res);
+        assert_eq!(e, res);
+        assert_eq!(f, res);
     }
 
     #[test]

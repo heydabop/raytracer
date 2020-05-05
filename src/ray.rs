@@ -2,8 +2,8 @@ use super::vec3::Vec3;
 
 #[derive(Debug, PartialEq)]
 pub struct Ray {
-    origin: Vec3,
-    direction: Vec3,
+    pub origin: Vec3,
+    pub direction: Vec3,
 }
 
 impl Ray {
@@ -16,7 +16,14 @@ impl Ray {
     }
 
     pub fn at(&self, t: f64) -> Vec3 {
-        &self.origin + &(&self.direction * t)
+        &self.origin + &self.direction * t
+    }
+
+    pub fn color(&self) -> Vec3 {
+        let unit_direction = self.direction.unit_vector();
+        let t = 0.5 * (unit_direction.1 + 1.0);
+
+        Vec3(1.0, 1.0, 1.0) * (1.0 - t) + Vec3(0.5, 0.7, 1.0) * t
     }
 }
 
