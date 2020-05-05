@@ -1,3 +1,5 @@
+use super::hit::*;
+use super::sphere::Sphere;
 use super::vec3::Vec3;
 use std::default::Default;
 
@@ -21,32 +23,26 @@ impl Ray {
     }
 
     pub fn color(&self) -> Vec3 {
-        let mut t = self.hit_sphere(&Vec3::init(0.0, 0.0, -1.0), 0.5);
-        if t > 0.0 {
-            let n = (&self.at(t) - &Vec3::init(0.0, 0.0, -1.0)).unit_vector();
-            return Vec3::init(n.x + 1.0, n.y + 1.0, n.z + 1.0) * 0.5;
+        let s = &Sphere {
+            center: Vec3::init(0.0, 0.0, -1.0),
+            radius: 0.5,
+        };
+        let hit = &s.hit(self, 0.0, 10.0);
+        if let Hit::Hit {
+            point: _,
+            normal,
+            t: _,
+        } = hit
+        {
+            return Vec3::init(normal.x + 1.0, normal.y + 1.0, normal.z + 1.0) * 0.5;
         }
 
         // miss; return background gradient
 
         let unit_direction = self.direction.unit_vector();
-        t = 0.5 * (unit_direction.y + 1.0);
+        let t = 0.5 * (unit_direction.y + 1.0);
 
         Vec3::init(1.0, 1.0, 1.0) * (1.0 - t) + Vec3::init(0.5, 0.7, 1.0) * t
-    }
-
-    fn hit_sphere(&self, center: &Vec3, radius: f64) -> f64 {
-        let oc = &self.origin - center;
-        let a = self.direction.length_squared();
-        let half_b = oc.dot(&self.direction);
-        let c = oc.length_squared() - radius * radius;
-        let discriminant = half_b * half_b - a * c;
-
-        if discriminant < 0.0 {
-            -1.0
-        } else {
-            (-half_b - discriminant.sqrt()) / a
-        }
     }
 }
 

@@ -1,12 +1,12 @@
-use std::io::{self, Write};
-
-mod vec3;
-use vec3::Vec3;
-
-mod ray;
-use ray::Ray;
-
+mod hit;
 mod ppm;
+mod ray;
+mod sphere;
+mod vec3;
+
+use ray::Ray;
+use std::io::{self, Write};
+use vec3::Vec3;
 
 fn main() {
     let aspect_ratio = 16.0 / 9.0;
