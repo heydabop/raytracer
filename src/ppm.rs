@@ -19,7 +19,7 @@ pub fn p3_pixel(color: Vec3) -> String {
 }
 
 #[allow(dead_code)]
-pub fn p6_image(colors: &Vec<Vec<Vec3>>) -> Vec<u8> {
+pub fn p6_image(colors: &[Vec<Vec3>]) -> Vec<u8> {
     if colors.is_empty() || colors[0].is_empty() {
         let mut image = vec![];
         image.extend_from_slice(b"P6 0 0 255\n");
