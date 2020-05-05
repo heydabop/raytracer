@@ -65,18 +65,6 @@ impl Vec3 {
     pub fn unit_vector(&self) -> Self {
         self / self.length()
     }
-
-    pub fn ppm_pixel(self) -> String {
-        if !self.is_valid_color() {
-            panic!("Color {} out of range", &self)
-        }
-        format!(
-            "{} {} {}\n",
-            (255.999 * self.x) as u8,
-            (255.999 * self.y) as u8,
-            (255.999 * self.z) as u8
-        )
-    }
 }
 
 impl fmt::Display for &Vec3 {
