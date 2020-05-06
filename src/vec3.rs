@@ -3,7 +3,7 @@ use rand::Rng;
 use std::fmt;
 use std::ops;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug)]
 pub struct Vec3 {
     pub x: f64,
     pub y: f64,
@@ -288,6 +288,14 @@ impl ops::Neg for Vec3 {
     }
 }
 
+impl std::cmp::PartialEq for Vec3 {
+    fn eq(&self, rhs: &Self) -> bool {
+        (self.x - rhs.x).abs() < f64::EPSILON
+            && (self.y - rhs.y).abs() < f64::EPSILON
+            && (self.z - rhs.z).abs() < f64::EPSILON
+    }
+}
+
 impl ops::Sub for &Vec3 {
     type Output = Vec3;
 
@@ -469,7 +477,7 @@ mod test {
     #[test]
     fn length() {
         let a = Vec3::init(2.0, 3.0, 4.0);
-        assert_eq!(a.length_squared(), 29.0);
-        assert_eq!(a.length(), 29.0_f64.sqrt());
+        assert!((a.length_squared() - 29.0).abs() < f64::EPSILON);
+        assert!((a.length() - 29.0_f64.sqrt()).abs() < f64::EPSILON);
     }
 }
