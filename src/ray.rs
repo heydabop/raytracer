@@ -1,5 +1,6 @@
 use super::hit::{Hit, Hittable};
 use super::vec3::Vec3;
+use rand_pcg::Pcg64Mcg;
 
 #[derive(Debug, PartialEq)]
 pub struct Ray {
@@ -20,14 +21,14 @@ impl Ray {
         &self.origin + &self.direction * t
     }
 
-    pub fn color<T: Hittable>(&self, hittable: &T, depth: u16) -> Vec3 {
+    pub fn color<T: Hittable>(&self, hittable: &T, mut rng: &mut Pcg64Mcg, depth: u16) -> Vec3 {
         if depth == 0 {
             return Vec3::default();
         }
 
         if let Hit::Hit(hit) = hittable.hit(self, 0.001, f64::INFINITY) {
-            if let Some(scatter) = hit.material.scatter(self, &hit) {
-                return scatter.attenuation * scatter.ray.color(hittable, depth - 1);
+            if let Some(scatter) = hit.material.scatter(self, &mut rng, &hit) {
+                return scatter.attenuation * scatter.ray.color(hittable, &mut rng, depth - 1);
             }
             return Vec3::init(0.0, 0.0, 0.0);
         }

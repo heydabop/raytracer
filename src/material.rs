@@ -1,6 +1,7 @@
 use super::hit::HitData;
 use super::ray::Ray;
 use super::vec3::Vec3;
+use rand_pcg::Pcg64Mcg;
 use std::fmt;
 
 pub struct Scatter {
@@ -10,7 +11,7 @@ pub struct Scatter {
 
 pub trait Material {
     // Returns (if ray scatters) new scattered ray and attenuation of ray
-    fn scatter(&self, r_in: &Ray, hit: &HitData) -> Option<Scatter>;
+    fn scatter(&self, r_in: &Ray, rng: &mut Pcg64Mcg, hit: &HitData) -> Option<Scatter>;
 }
 
 #[allow(clippy::module_name_repetitions)]
@@ -30,17 +31,9 @@ impl Lambertian {
     }
 }
 
-impl Default for Lambertian {
-    fn default() -> Self {
-        Self {
-            albedo: Vec3::default(),
-        }
-    }
-}
-
 impl Material for Lambertian {
-    fn scatter(&self, _: &Ray, hit: &HitData) -> Option<Scatter> {
-        let scatter_direction = &hit.normal + Vec3::random_unit_vector();
+    fn scatter(&self, _: &Ray, mut rng: &mut Pcg64Mcg, hit: &HitData) -> Option<Scatter> {
+        let scatter_direction = &hit.normal + Vec3::random_unit_vector(&mut rng);
         let scattered_ray = Ray {
             origin: hit.point.clone(),
             direction: scatter_direction,
@@ -73,22 +66,13 @@ impl Metal {
     }
 }
 
-impl Default for Metal {
-    fn default() -> Self {
-        Self {
-            albedo: Vec3::default(),
-            fuzz: 0.0,
-        }
-    }
-}
-
 impl Material for Metal {
-    fn scatter(&self, r_in: &Ray, hit: &HitData) -> Option<Scatter> {
+    fn scatter(&self, r_in: &Ray, mut rng: &mut Pcg64Mcg, hit: &HitData) -> Option<Scatter> {
         let reflected = r_in.direction.unit_vector().reflect(&hit.normal);
         if reflected.dot(&hit.normal) > 0.0 {
             let scattered = Ray {
                 origin: hit.point.clone(),
-                direction: reflected + Vec3::random_in_unit_sphere() * self.fuzz,
+                direction: reflected + Vec3::random_in_unit_sphere(&mut rng) * self.fuzz,
             };
             return Some(Scatter {
                 ray: scattered,

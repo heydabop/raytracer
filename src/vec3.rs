@@ -1,4 +1,3 @@
-use rand::prelude::*;
 use rand::Rng;
 use std::fmt;
 use std::ops;
@@ -33,9 +32,7 @@ impl Vec3 {
         )
     }
 
-    pub fn random_in_unit_sphere() -> Self {
-        let mut rng = thread_rng();
-
+    pub fn random_in_unit_sphere<T: Rng>(mut rng: &mut T) -> Self {
         loop {
             let v = Self::random(&mut rng, -1.0, 1.0);
             if v.length_squared() < 1.0 {
@@ -44,9 +41,7 @@ impl Vec3 {
         }
     }
 
-    pub fn random_unit_vector() -> Self {
-        let mut rng = thread_rng();
-
+    pub fn random_unit_vector<T: Rng>(rng: &mut T) -> Self {
         let a: f64 = rng.gen_range(0.0, 2.0 * std::f64::consts::PI);
         let z: f64 = rng.gen_range(-1.0, 1.0);
         let r = (1.0 - z * z).sqrt();
@@ -54,8 +49,8 @@ impl Vec3 {
         Self::init(r * a.cos(), r * a.sin(), z)
     }
 
-    pub fn random_in_hemisphere(normal: &Self) -> Self {
-        let in_unit_sphere = Self::random_in_unit_sphere();
+    pub fn random_in_hemisphere<T: Rng>(mut rng: &mut T, normal: &Self) -> Self {
+        let in_unit_sphere = Self::random_in_unit_sphere(&mut rng);
         if in_unit_sphere.dot(normal) > 0.0 {
             // same direction (so same hemisphere) as normal
             in_unit_sphere
