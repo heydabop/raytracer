@@ -50,9 +50,8 @@ impl Vec3 {
         let a: f64 = rng.gen_range(0.0, 2.0 * std::f64::consts::PI);
         let z: f64 = rng.gen_range(-1.0, 1.0);
         let r = (1.0 - z * z).sqrt();
-        let (a_sin, a_cos) = a.sin_cos();
 
-        Self::init(r * a_cos, r * a_sin, z)
+        Self::init(r * a.cos(), r * a.sin(), z)
     }
 
     pub fn random_in_hemisphere(normal: &Self) -> Self {
