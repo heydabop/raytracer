@@ -1,17 +1,22 @@
 use super::hit::{Hit, HitData, Hittable};
+use super::material::{Lambertian, MaterialWritable};
 use super::ray::Ray;
 use super::vec3::Vec3;
+use std::rc::Rc;
 
+#[derive(Debug)]
 pub struct Sphere {
     pub center: Vec3,
     pub radius: f64,
+    pub material: Rc<dyn MaterialWritable>,
 }
 
 impl Sphere {
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Sphere {
             center: Vec3::new(),
             radius: 0.0,
+            material: Rc::new(Lambertian::new(Vec3::init(0.5, 0.5, 0.5))),
         }
     }
 
@@ -30,6 +35,7 @@ impl Sphere {
             normal: normal.unit_vector(),
             t,
             front_face,
+            material: Rc::clone(&self.material),
         })
     }
 }
@@ -73,13 +79,14 @@ impl Hittable for &Sphere {
 #[cfg(test)]
 #[allow(clippy::unreadable_literal)]
 mod test {
-    use super::{Hit, HitData, Hittable, Ray, Sphere, Vec3};
+    use super::{Hit, HitData, Hittable, Lambertian, Ray, Rc, Sphere, Vec3};
 
     #[test]
     fn hit() {
         let s = &Sphere {
             center: Vec3::init(0.0, 0.0, 1.0),
             radius: 0.5,
+            material: Rc::new(Lambertian::new(Vec3::init(0.5, 0.5, 0.5))),
         };
         let hit_ray = Ray {
             origin: Vec3::new(),
@@ -108,6 +115,7 @@ mod test {
                 },
                 t: 0.5393694833669621,
                 front_face: true,
+                material: Rc::new(Lambertian::new(Vec3::init(0.5, 0.5, 0.5))),
             })
         );
         assert_eq!(
@@ -125,6 +133,7 @@ mod test {
                 },
                 t: 0.5,
                 front_face: false,
+                material: Rc::new(Lambertian::new(Vec3::init(0.5, 0.5, 0.5))),
             })
         );
         assert_eq!(s.hit(&hit_ray, 0.0, 0.5), Hit::Miss);
