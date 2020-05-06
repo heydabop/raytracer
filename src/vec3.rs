@@ -464,4 +464,11 @@ mod test {
         assert!((a[1] - 8.0).abs() < f64::EPSILON);
         assert!((a[2] - 9.0).abs() < f64::EPSILON);
     }
+
+    #[test]
+    fn length() {
+        let a = Vec3::init(2.0, 3.0, 4.0);
+        assert_eq!(a.length_squared(), 29.0);
+        assert_eq!(a.length(), 29.0_f64.sqrt());
+    }
 }
