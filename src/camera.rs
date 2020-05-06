@@ -9,12 +9,18 @@ pub struct Camera {
 }
 
 impl Camera {
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
+        let origin = Vec3::init(0.0, 0.0, 0.0);
+        let horizontal = Vec3::init(4.0, 0.0, 0.0);
+        let vertical = Vec3::init(0.0, 2.25, 0.0);
         Camera {
-            origin: Vec3::init(0.0, 0.0, 0.0),
-            horizontal: Vec3::init(4.0, 0.0, 0.0),
-            vertical: Vec3::init(0.0, 2.25, 0.0),
-            lower_left_corner: Vec3::init(-2.0, -1.0, -1.0),
+            lower_left_corner: &origin
+                - &(&horizontal / 2.0)
+                - &vertical / 2.0
+                - Vec3::init(0.0, 0.0, 1.0),
+            origin,
+            horizontal,
+            vertical,
         }
     }
 
