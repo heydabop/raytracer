@@ -44,6 +44,17 @@ impl Vec3 {
         }
     }
 
+    pub fn random_unit_vector() -> Self {
+        let mut rng = thread_rng();
+
+        let a: f64 = rng.gen_range(0.0, 2.0 * std::f64::consts::PI);
+        let z: f64 = rng.gen_range(-1.0, 1.0);
+        let r = (1.0 - z * z).sqrt();
+        let (a_sin, a_cos) = a.sin_cos();
+
+        Self::init(r * a_cos, r * a_sin, z)
+    }
+
     pub const fn r(&self) -> f64 {
         self.x
     }

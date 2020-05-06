@@ -26,7 +26,7 @@ impl Ray {
         }
 
         if let Hit::Hit(hit) = hittable.hit(self, 0.001, f64::INFINITY) {
-            let target = &hit.point + &hit.normal + Vec3::random_in_unit_sphere();
+            let target = &hit.point + &hit.normal + Vec3::random_unit_vector();
             let target_ray = Ray {
                 origin: hit.point.clone(),
                 direction: target - &hit.point,
