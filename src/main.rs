@@ -10,7 +10,7 @@ mod sphere;
 mod vec3;
 
 use camera::Camera;
-use material::Lambertian;
+use material::{Lambertian, Metal};
 use rand::prelude::*;
 use scene::Scene;
 use sphere::Sphere;
@@ -34,12 +34,22 @@ fn main() {
     scene.add(Box::new(Sphere {
         center: Vec3::init(0.0, 0.0, -1.0),
         radius: 0.5,
-        material: Rc::new(Lambertian::new(Vec3::init(0.5, 0.5, 0.5))),
+        material: Rc::new(Lambertian::new(Vec3::init(0.7, 0.3, 0.3))),
     }));
     scene.add(Box::new(Sphere {
         center: Vec3::init(0.0, -100.5, -1.0),
         radius: 100.0,
-        material: Rc::new(Lambertian::new(Vec3::init(0.5, 0.5, 0.5))),
+        material: Rc::new(Lambertian::new(Vec3::init(0.8, 0.8, 0.0))),
+    }));
+    scene.add(Box::new(Sphere {
+        center: Vec3::init(-1.0, 0.0, -1.0),
+        radius: 0.5,
+        material: Rc::new(Metal::new(Vec3::init(0.8, 0.8, 0.8), 0.2)),
+    }));
+    scene.add(Box::new(Sphere {
+        center: Vec3::init(1.0, 0.0, -1.0),
+        radius: 0.5,
+        material: Rc::new(Metal::new(Vec3::init(0.8, 0.6, 0.2), 0.8)),
     }));
 
     let mut colors: Vec<Vec<Vec3>> = vec![];

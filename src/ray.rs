@@ -26,12 +26,10 @@ impl Ray {
         }
 
         if let Hit::Hit(hit) = hittable.hit(self, 0.001, f64::INFINITY) {
-            let target = &hit.point + &hit.normal + Vec3::random_unit_vector();
-            let target_ray = Ray {
-                origin: hit.point.clone(),
-                direction: target - &hit.point,
-            };
-            return target_ray.color(hittable, depth - 1) * 0.5;
+            if let Some(scatter) = hit.material.scatter(self, &hit) {
+                return scatter.attenuation * scatter.ray.color(hittable, depth - 1);
+            }
+            return Vec3::init(0.0, 0.0, 0.0);
         }
 
         let unit_direction = self.direction.unit_vector();
