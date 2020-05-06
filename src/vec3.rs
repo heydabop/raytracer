@@ -33,13 +33,13 @@ impl Vec3 {
         self.z
     }
 
-    pub fn is_valid_color(&self) -> bool {
-        0.0 <= self.x
-            && self.x <= 1.0
-            && 0.0 <= self.y
-            && self.y <= 1.0
-            && 0.0 <= self.z
-            && self.z <= 1.0
+    pub fn is_valid_color(&self, samples: u16) -> bool {
+        let scale = 1.0 / f64::from(samples);
+        let x = self.x * scale;
+        let y = self.y * scale;
+        let z = self.z * scale;
+
+        0.0 <= x && x <= 1.0 && 0.0 <= y && y <= 1.0 && 0.0 <= z && z <= 1.0
     }
 
     pub fn length(&self) -> f64 {
@@ -259,6 +259,14 @@ impl ops::Sub for Vec3 {
 
     fn sub(self, rhs: Self) -> Self::Output {
         &self - &rhs
+    }
+}
+
+impl ops::Sub<&Vec3> for Vec3 {
+    type Output = Vec3;
+
+    fn sub(self, rhs: &Vec3) -> Self::Output {
+        &self - rhs
     }
 }
 
