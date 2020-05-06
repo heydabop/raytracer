@@ -20,9 +20,9 @@ pub fn p3_pixel(color: &Vec3, samples_per_pixel: u16) -> String {
     {
         format!(
             "{} {} {}\n",
-            (256.0 * r.clamp(0.0, 0.999)) as u8,
-            (256.0 * g.clamp(0.0, 0.999)) as u8,
-            (256.0 * b.clamp(0.0, 0.999)) as u8,
+            (256.0 * r.sqrt().clamp(0.0, 0.999)) as u8,
+            (256.0 * g.sqrt().clamp(0.0, 0.999)) as u8,
+            (256.0 * b.sqrt().clamp(0.0, 0.999)) as u8,
         )
     }
 }
@@ -49,9 +49,9 @@ pub fn p6_image(colors: &[Vec<Vec3>], samples_per_pixel: u16) -> Vec<u8> {
 
             #[allow(clippy::cast_sign_loss, clippy::cast_possible_truncation)]
             {
-                image.push((256.0 * r.clamp(0.0, 0.999)) as u8);
-                image.push((256.0 * g.clamp(0.0, 0.999)) as u8);
-                image.push((256.0 * b.clamp(0.0, 0.999)) as u8);
+                image.push((256.0 * r.sqrt().clamp(0.0, 0.999)) as u8);
+                image.push((256.0 * g.sqrt().clamp(0.0, 0.999)) as u8);
+                image.push((256.0 * b.sqrt().clamp(0.0, 0.999)) as u8);
             }
         }
     }
