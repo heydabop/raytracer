@@ -21,6 +21,7 @@ fn main() {
     #[allow(clippy::cast_sign_loss, clippy::cast_possible_truncation)]
     let image_height = (f64::from(image_width) / aspect_ratio).round() as u16;
     let samples_per_pixel = 100;
+    let max_depth = 50;
 
     let mut stdout = io::stdout();
 
@@ -52,7 +53,7 @@ fn main() {
                 let u = (f64::from(i) + rng.gen::<f64>()) / f64::from(image_width - 1);
                 let v = (f64::from(j) + rng.gen::<f64>()) / f64::from(image_height - 1);
                 let r = camera.ray(u, v);
-                pixel_color += &r.color(&scene);
+                pixel_color += &r.color(&scene, max_depth);
             }
             row.push(pixel_color);
         }

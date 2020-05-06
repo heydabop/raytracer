@@ -27,7 +27,7 @@ impl Sphere {
         };
         Hit::Hit(HitData {
             point,
-            normal,
+            normal: normal.unit_vector(),
             t,
             front_face,
         })

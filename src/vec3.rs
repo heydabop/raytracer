@@ -1,3 +1,5 @@
+use rand::prelude::*;
+use rand::Rng;
 use std::fmt;
 use std::ops;
 
@@ -21,6 +23,25 @@ impl Vec3 {
     #[allow(dead_code)]
     pub const fn init(x: f64, y: f64, z: f64) -> Self {
         Self { x, y, z }
+    }
+
+    pub fn random<T: Rng>(rng: &mut T, min: f64, max: f64) -> Self {
+        Self::init(
+            rng.gen_range(min, max),
+            rng.gen_range(min, max),
+            rng.gen_range(min, max),
+        )
+    }
+
+    pub fn random_in_unit_sphere() -> Self {
+        let mut rng = thread_rng();
+
+        loop {
+            let v = Self::random(&mut rng, -1.0, 1.0);
+            if v.length_squared() < 1.0 {
+                return v;
+            }
+        }
     }
 
     pub const fn r(&self) -> f64 {

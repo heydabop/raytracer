@@ -20,9 +20,18 @@ impl Ray {
         &self.origin + &self.direction * t
     }
 
-    pub fn color<T: Hittable>(&self, hittable: &T) -> Vec3 {
+    pub fn color<T: Hittable>(&self, hittable: &T, depth: u16) -> Vec3 {
+        if depth == 0 {
+            return Vec3::default();
+        }
+
         if let Hit::Hit(hit) = hittable.hit(self, 0.0, f64::INFINITY) {
-            return (hit.normal + Vec3::init(1.0, 1.0, 1.0)) * 0.5;
+            let target = &hit.point + &hit.normal + Vec3::random_in_unit_sphere();
+            let target_ray = Ray {
+                origin: hit.point.clone(),
+                direction: target - &hit.point,
+            };
+            return target_ray.color(hittable, depth - 1) * 0.5;
         }
 
         let unit_direction = self.direction.unit_vector();
