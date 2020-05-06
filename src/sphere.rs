@@ -51,8 +51,8 @@ impl Hittable for Sphere {
         let oc = &r.origin - &self.center;
         let a = r.direction.length_squared();
         let half_b = oc.dot(&r.direction);
-        let c = oc.length_squared() - self.radius * self.radius;
-        let discriminant = half_b * half_b - a * c;
+        let c = (-self.radius).mul_add(self.radius, oc.length_squared());
+        let discriminant = (-a).mul_add(c, half_b * half_b);
 
         if discriminant > 0.0 {
             let root = discriminant.sqrt();
@@ -104,16 +104,16 @@ mod test {
             s.hit(&hit_ray, 0.0, 2.0),
             Hit::Hit(HitData {
                 point: Vec3 {
-                    x: 0.10787389667339242,
-                    y: 0.16181084501008863,
-                    z: 0.5393694833669621
+                    x: 0.10787389667339245,
+                    y: 0.16181084501008866,
+                    z: 0.5393694833669622
                 },
                 normal: Vec3 {
-                    x: 0.21574779334678484,
-                    y: 0.32362169002017727,
-                    z: -0.9212610332660758
+                    x: 0.2157477933467849,
+                    y: 0.3236216900201773,
+                    z: -0.9212610332660756
                 },
-                t: 0.5393694833669621,
+                t: 0.5393694833669622,
                 front_face: true,
                 material: Rc::new(Lambertian::new(Vec3::init(0.5, 0.5, 0.5))),
             })

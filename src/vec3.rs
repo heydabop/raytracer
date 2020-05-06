@@ -88,11 +88,12 @@ impl Vec3 {
     }
 
     pub fn length_squared(&self) -> f64 {
-        self.x * self.x + self.y * self.y + self.z * self.z
+        self.dot(self)
     }
 
     pub fn dot(&self, rhs: &Self) -> f64 {
-        self.x * rhs.x + self.y * rhs.y + self.z * rhs.z
+        // x*x + y*y + z*z
+        self.x.mul_add(rhs.x, self.y.mul_add(rhs.y, self.z * rhs.z))
     }
 
     pub fn cross(&self, rhs: &Self) -> Self {
