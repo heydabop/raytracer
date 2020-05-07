@@ -30,7 +30,11 @@ fn main() {
 
     let mut stdout = io::stdout();
 
-    let camera = Camera::new(90.0, aspect_ratio);
+    let cam_center = Vec3::init(1.5, 1.0, 1.0);
+    let cam_target = Vec3::init(0.0, 0.2, -1.0);
+    let cam_up = Vec3::init(0.0, 1.0, 0.0);
+
+    let camera = Camera::new(cam_center, &cam_target, &cam_up, 45.0, aspect_ratio);
 
     let mut scene = Scene::new();
     scene.add(Box::new(Sphere {
