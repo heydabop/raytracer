@@ -30,7 +30,7 @@ fn main() {
 
     let mut stdout = io::stdout();
 
-    let camera = Camera::new();
+    let camera = Camera::new(90.0, aspect_ratio);
 
     let mut scene = Scene::new();
     scene.add(Box::new(Sphere {
