@@ -43,8 +43,8 @@ fn main() {
         material: Rc::new(Lambertian::new(Vec3::from_xyz(0.1, 0.2, 0.5))),
     }));
     scene.add(Box::new(Sphere {
-        center: Vec3::from_xyz(0.0, -100.5, -1.0),
-        radius: 100.0,
+        center: Vec3::from_xyz(0.0, -500.5, -1.0),
+        radius: 500.0,
         material: Rc::new(Lambertian::new(Vec3::from_xyz(0.8, 0.8, 0.0))),
     }));
     scene.add(Box::new(Sphere {
@@ -55,7 +55,17 @@ fn main() {
     scene.add(Box::new(Sphere {
         center: Vec3::from_xyz(1.0, 0.0, -1.0),
         radius: 0.5,
-        material: Rc::new(Metal::new(Vec3::from_xyz(0.8, 0.6, 0.2), 0.02)),
+        material: Rc::new(Metal::new(Vec3::from_xyz(0.8, 0.6, 0.2), 0.1)),
+    }));
+    scene.add(Box::new(Sphere {
+        center: Vec3::from_xyz(-0.55, -0.302263, -2.4),
+        radius: 0.2,
+        material: Rc::new(Lambertian::new(Vec3::from_xyz(0.9, 0.07, 0.05))),
+    }));
+    scene.add(Box::new(Sphere {
+        center: Vec3::from_xyz(-1.4, 0.0868, 1.2),
+        radius: 0.58,
+        material: Rc::new(Lambertian::new(Vec3::from_xyz(0.8, 0.8, 0.8))),
     }));
 
     let mut colors: Vec<Vec<Vec3>> = vec![];
