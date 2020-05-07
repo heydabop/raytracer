@@ -53,6 +53,11 @@ fn main() {
         material: Rc::new(Dielectric::new(1.5)),
     }));
     scene.add(Box::new(Sphere {
+        center: Vec3::from_xyz(-1.0, 0.0, -1.0),
+        radius: -0.45,
+        material: Rc::new(Dielectric::new(1.5)),
+    }));
+    scene.add(Box::new(Sphere {
         center: Vec3::from_xyz(1.0, 0.0, -1.0),
         radius: 0.5,
         material: Rc::new(Metal::new(Vec3::from_xyz(0.8, 0.6, 0.2), 0.02)),
