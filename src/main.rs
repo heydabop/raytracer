@@ -25,16 +25,16 @@ fn main() {
     let image_width: u16 = 1280;
     #[allow(clippy::cast_sign_loss, clippy::cast_possible_truncation)]
     let image_height = (f64::from(image_width) / aspect_ratio).round() as u16;
-    let samples_per_pixel = 100;
+    let samples_per_pixel = 200;
     let max_depth = 50;
 
     let mut stdout = io::stdout();
 
-    let cam_center = Vec3::from_xyz(0.0, 0.0, 0.0);
-    let cam_target = Vec3::from_xyz(0.0, 0.0, -1.0);
+    let cam_center = Vec3::from_xyz(-1.5, 0.8, 1.0);
+    let cam_target = Vec3::from_xyz(0.0, 0.1, -1.0);
     let cam_up = Vec3::from_xyz(0.0, 1.0, 0.0);
 
-    let camera = Camera::new(cam_center, &cam_target, &cam_up, 90.0, aspect_ratio);
+    let camera = Camera::new(cam_center, &cam_target, &cam_up, 50.0, aspect_ratio);
 
     let mut scene = Scene::new();
     scene.add(Box::new(Sphere {
@@ -50,11 +50,6 @@ fn main() {
     scene.add(Box::new(Sphere {
         center: Vec3::from_xyz(-1.0, 0.0, -1.0),
         radius: 0.5,
-        material: Rc::new(Dielectric::new(1.5)),
-    }));
-    scene.add(Box::new(Sphere {
-        center: Vec3::from_xyz(-1.0, 0.0, -1.0),
-        radius: -0.45,
         material: Rc::new(Dielectric::new(1.5)),
     }));
     scene.add(Box::new(Sphere {
