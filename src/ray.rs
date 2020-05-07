@@ -30,7 +30,7 @@ impl Ray {
             if let Some(scatter) = hit.material.scatter(self, &mut rng, &hit) {
                 return scatter.attenuation * scatter.ray.color(hittable, &mut rng, depth - 1);
             }
-            return Vec3::from_xyz(0.0, 0.0, 0.0);
+            return Vec3::new();
         }
 
         let unit_direction = self.direction.unit_vector();

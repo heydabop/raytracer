@@ -10,7 +10,7 @@ mod sphere;
 mod vec3;
 
 use camera::Camera;
-use material::{Lambertian, Metal};
+use material::{Dielectric, Lambertian, Metal};
 use rand::prelude::*;
 use rand_pcg::Pcg64Mcg;
 use scene::Scene;
@@ -30,17 +30,17 @@ fn main() {
 
     let mut stdout = io::stdout();
 
-    let cam_center = Vec3::from_xyz(1.5, 1.0, 1.0);
-    let cam_target = Vec3::from_xyz(0.0, 0.2, -1.0);
+    let cam_center = Vec3::from_xyz(0.0, 0.0, 0.0);
+    let cam_target = Vec3::from_xyz(0.0, 0.0, -1.0);
     let cam_up = Vec3::from_xyz(0.0, 1.0, 0.0);
 
-    let camera = Camera::new(cam_center, &cam_target, &cam_up, 45.0, aspect_ratio);
+    let camera = Camera::new(cam_center, &cam_target, &cam_up, 90.0, aspect_ratio);
 
     let mut scene = Scene::new();
     scene.add(Box::new(Sphere {
         center: Vec3::from_xyz(0.0, 0.0, -1.0),
         radius: 0.5,
-        material: Rc::new(Lambertian::new(Vec3::from_xyz(0.7, 0.3, 0.3))),
+        material: Rc::new(Lambertian::new(Vec3::from_xyz(0.1, 0.2, 0.5))),
     }));
     scene.add(Box::new(Sphere {
         center: Vec3::from_xyz(0.0, -100.5, -1.0),
@@ -50,12 +50,12 @@ fn main() {
     scene.add(Box::new(Sphere {
         center: Vec3::from_xyz(-1.0, 0.0, -1.0),
         radius: 0.5,
-        material: Rc::new(Metal::new(Vec3::from_xyz(0.8, 0.8, 0.8), 0.2)),
+        material: Rc::new(Dielectric::new(1.5)),
     }));
     scene.add(Box::new(Sphere {
         center: Vec3::from_xyz(1.0, 0.0, -1.0),
         radius: 0.5,
-        material: Rc::new(Metal::new(Vec3::from_xyz(0.8, 0.6, 0.2), 0.8)),
+        material: Rc::new(Metal::new(Vec3::from_xyz(0.8, 0.6, 0.2), 0.02)),
     }));
 
     let mut colors: Vec<Vec<Vec3>> = vec![];
@@ -74,7 +74,7 @@ fn main() {
         io::stderr().flush().unwrap();
 
         for i in 0..image_width {
-            let mut pixel_color = Vec3::from_xyz(0.0, 0.0, 0.0);
+            let mut pixel_color = Vec3::new();
             for _ in 0..samples_per_pixel {
                 let u = (f64::from(i) + rng.gen_range(0.0, 1.0)) / f64::from(image_width - 1);
                 let v = (f64::from(j) + rng.gen_range(0.0, 1.0)) / f64::from(image_height - 1);

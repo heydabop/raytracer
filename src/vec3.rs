@@ -106,6 +106,14 @@ impl Vec3 {
     pub fn reflect(&self, normal: &Self) -> Self {
         self - &(normal * 2.0 * self.dot(&normal))
     }
+
+    pub fn refract(&self, n: &Self, eta_ratio: f64) -> Self {
+        let cos_theta = -self.dot(n);
+        let r_out_parallel = (self + n * cos_theta) * eta_ratio;
+        let r_out_perpindicular = n * -(1.0 - r_out_parallel.length_squared()).sqrt();
+
+        r_out_parallel + r_out_perpindicular
+    }
 }
 
 impl Default for Vec3 {
@@ -504,6 +512,15 @@ mod test {
                 -1.2380984956319998,
                 -3.4761969912639996
             )
+        );
+    }
+
+    #[test]
+    fn refract() {
+        let a = Vec3::from_xyz(1.0, 2.0, 3.0).unit_vector();
+        assert_eq!(
+            a.refract(&Vec3::from_xyz(0.1, 1.0, 0.1).unit_vector(), 1.0 / 1.3),
+            Vec3::from_xyz(0.07757118074341529, -0.8689727581807664, 0.4887423221471451)
         );
     }
 }

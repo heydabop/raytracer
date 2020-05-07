@@ -1,6 +1,7 @@
 use super::hit::HitData;
 use super::ray::Ray;
 use super::vec3::Vec3;
+use rand::Rng;
 use rand_pcg::Pcg64Mcg;
 use std::fmt;
 
@@ -85,3 +86,61 @@ impl Material for Metal {
 }
 
 impl MaterialWritable for Metal {}
+
+// Dielectric
+
+#[derive(Debug)]
+pub struct Dielectric {
+    refraction_index: f64,
+}
+
+impl Dielectric {
+    pub fn new(refraction_index: f64) -> Self {
+        Self { refraction_index }
+    }
+
+    fn schlick(cosine: f64, refraction_index: f64) -> f64 {
+        let mut r0 = (1.0 - refraction_index) / (1.0 + refraction_index);
+        r0 *= r0;
+        (1.0 - r0).mul_add((1.0 - cosine).powi(5), r0)
+    }
+}
+
+impl Material for Dielectric {
+    fn scatter(&self, r_in: &Ray, rng: &mut Pcg64Mcg, hit: &HitData) -> Option<Scatter> {
+        let attenuation = Vec3::from_xyz(1.0, 1.0, 1.0);
+        let eta_ratio = if hit.front_face {
+            1.0 / self.refraction_index
+        } else {
+            self.refraction_index
+        };
+
+        let unit_direction = r_in.direction.unit_vector();
+        let cos_theta = (-&unit_direction).dot(&hit.normal).min(1.0);
+        let sin_theta = (-cos_theta.mul_add(cos_theta, -1.0)).sqrt();
+        if eta_ratio * sin_theta > 1.0 || rng.gen::<f64>() < Self::schlick(cos_theta, eta_ratio) {
+            let reflected = unit_direction.reflect(&hit.normal);
+            let scattered = Ray {
+                origin: hit.point.clone(),
+                direction: reflected,
+            };
+            return Some(Scatter {
+                ray: scattered,
+                attenuation,
+            });
+        }
+
+        let refracted = unit_direction.refract(&hit.normal, eta_ratio);
+        let scattered = Ray {
+            origin: hit.point.clone(),
+            direction: refracted,
+        };
+
+        Some(Scatter {
+            ray: scattered,
+            attenuation,
+        })
+    }
+}
+
+impl MaterialWritable for Dielectric {}
