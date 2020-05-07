@@ -16,7 +16,7 @@ impl Sphere {
         Sphere {
             center: Vec3::new(),
             radius: 0.0,
-            material: Rc::new(Lambertian::new(Vec3::init(0.5, 0.5, 0.5))),
+            material: Rc::new(Lambertian::new(Vec3::from_xyz(0.5, 0.5, 0.5))),
         }
     }
 
@@ -84,21 +84,21 @@ mod test {
     #[test]
     fn hit() {
         let s = &Sphere {
-            center: Vec3::init(0.0, 0.0, 1.0),
+            center: Vec3::from_xyz(0.0, 0.0, 1.0),
             radius: 0.5,
-            material: Rc::new(Lambertian::new(Vec3::init(0.5, 0.5, 0.5))),
+            material: Rc::new(Lambertian::new(Vec3::from_xyz(0.5, 0.5, 0.5))),
         };
         let hit_ray = Ray {
             origin: Vec3::new(),
-            direction: Vec3::init(0.2, 0.3, 1.0),
+            direction: Vec3::from_xyz(0.2, 0.3, 1.0),
         };
         let inside_hit_ray = Ray {
-            origin: Vec3::init(0.0, 0.0, 1.0),
-            direction: Vec3::init(0.0, 1.0, 0.0),
+            origin: Vec3::from_xyz(0.0, 0.0, 1.0),
+            direction: Vec3::from_xyz(0.0, 1.0, 0.0),
         };
         let miss_ray = Ray {
             origin: Vec3::new(),
-            direction: Vec3::init(0.0, 0.7, 1.0),
+            direction: Vec3::from_xyz(0.0, 0.7, 1.0),
         };
         assert_eq!(
             s.hit(&hit_ray, 0.0, 2.0),
@@ -115,7 +115,7 @@ mod test {
                 },
                 t: 0.5393694833669622,
                 front_face: true,
-                material: Rc::new(Lambertian::new(Vec3::init(0.5, 0.5, 0.5))),
+                material: Rc::new(Lambertian::new(Vec3::from_xyz(0.5, 0.5, 0.5))),
             })
         );
         assert_eq!(
@@ -133,7 +133,7 @@ mod test {
                 },
                 t: 0.5,
                 front_face: false,
-                material: Rc::new(Lambertian::new(Vec3::init(0.5, 0.5, 0.5))),
+                material: Rc::new(Lambertian::new(Vec3::from_xyz(0.5, 0.5, 0.5))),
             })
         );
         assert_eq!(s.hit(&hit_ray, 0.0, 0.5), Hit::Miss);

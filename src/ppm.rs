@@ -71,7 +71,7 @@ mod test {
     #[test]
     fn p3_pixel() {
         assert_eq!(
-            super::p3_pixel(&Vec3::init(0.0, 0.77, 1.0), 1),
+            super::p3_pixel(&Vec3::from_xyz(0.0, 0.77, 1.0), 1),
             "0 224 255\n"
         );
     }
@@ -80,14 +80,14 @@ mod test {
     fn p6_image() {
         let colors = vec![
             vec![
-                Vec3::init(1.0, 0.0, 0.0),
-                Vec3::init(0.0, 1.0, 0.0),
-                Vec3::init(0.0, 0.0, 1.0),
+                Vec3::from_xyz(1.0, 0.0, 0.0),
+                Vec3::from_xyz(0.0, 1.0, 0.0),
+                Vec3::from_xyz(0.0, 0.0, 1.0),
             ],
             vec![
-                Vec3::init(0.5, 0.0, 0.0),
-                Vec3::init(0.0, 0.5, 0.0),
-                Vec3::init(0.0, 0.0, 0.5),
+                Vec3::from_xyz(0.5, 0.0, 0.0),
+                Vec3::from_xyz(0.0, 0.5, 0.0),
+                Vec3::from_xyz(0.0, 0.0, 0.5),
             ],
         ];
         assert_eq!(

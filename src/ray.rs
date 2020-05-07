@@ -30,12 +30,12 @@ impl Ray {
             if let Some(scatter) = hit.material.scatter(self, &mut rng, &hit) {
                 return scatter.attenuation * scatter.ray.color(hittable, &mut rng, depth - 1);
             }
-            return Vec3::init(0.0, 0.0, 0.0);
+            return Vec3::from_xyz(0.0, 0.0, 0.0);
         }
 
         let unit_direction = self.direction.unit_vector();
         let t = 0.5 * (unit_direction.y + 1.0);
-        Vec3::init(1.0, 1.0, 1.0) * (1.0 - t) + Vec3::init(0.5, 0.7, 1.0) * t
+        Vec3::from_xyz(1.0, 1.0, 1.0) * (1.0 - t) + Vec3::from_xyz(0.5, 0.7, 1.0) * t
     }
 }
 
@@ -52,10 +52,10 @@ mod test {
     #[test]
     fn at() {
         let a = Ray {
-            origin: Vec3::init(0.0, -1.0, -2.0),
-            direction: Vec3::init(1.0, 2.0, 3.0),
+            origin: Vec3::from_xyz(0.0, -1.0, -2.0),
+            direction: Vec3::from_xyz(1.0, 2.0, 3.0),
         };
         let b = &a.at(2.5);
-        assert_eq!(b, &Vec3::init(2.5, 4.0, 5.5));
+        assert_eq!(b, &Vec3::from_xyz(2.5, 4.0, 5.5));
     }
 }

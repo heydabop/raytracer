@@ -20,12 +20,12 @@ impl Vec3 {
     }
 
     #[allow(dead_code)]
-    pub const fn init(x: f64, y: f64, z: f64) -> Self {
+    pub const fn from_xyz(x: f64, y: f64, z: f64) -> Self {
         Self { x, y, z }
     }
 
     pub fn random<T: Rng>(rng: &mut T, min: f64, max: f64) -> Self {
-        Self::init(
+        Self::from_xyz(
             rng.gen_range(min, max),
             rng.gen_range(min, max),
             rng.gen_range(min, max),
@@ -46,7 +46,7 @@ impl Vec3 {
         let z: f64 = rng.gen_range(-1.0, 1.0);
         let r = (1.0 - z * z).sqrt();
 
-        Self::init(r * a.cos(), r * a.sin(), z)
+        Self::from_xyz(r * a.cos(), r * a.sin(), z)
     }
 
     pub fn random_in_hemisphere<T: Rng>(mut rng: &mut T, normal: &Self) -> Self {
@@ -334,13 +334,13 @@ mod test {
 
     #[test]
     fn add() {
-        let a = Vec3::init(1.0, 2.0, 3.0);
-        let b = Vec3::init(4.0, 5.0, 6.0);
+        let a = Vec3::from_xyz(1.0, 2.0, 3.0);
+        let b = Vec3::from_xyz(4.0, 5.0, 6.0);
         let c = b.clone();
         let d = &a + &b;
         let e = &a + b;
         let f = a + c;
-        let res = Vec3::init(5.0, 7.0, 9.0);
+        let res = Vec3::from_xyz(5.0, 7.0, 9.0);
         assert_eq!(d, res);
         assert_eq!(e, res);
         assert_eq!(f, res);
@@ -348,108 +348,108 @@ mod test {
 
     #[test]
     fn add_assign() {
-        let mut a = Vec3::init(1.0, 2.0, 3.0);
-        let b = Vec3::init(4.0, 5.0, 6.0);
+        let mut a = Vec3::from_xyz(1.0, 2.0, 3.0);
+        let b = Vec3::from_xyz(4.0, 5.0, 6.0);
         a += &b;
-        assert_eq!(a, Vec3::init(5.0, 7.0, 9.0));
+        assert_eq!(a, Vec3::from_xyz(5.0, 7.0, 9.0));
     }
 
     #[test]
     fn cross() {
-        let a = Vec3::init(1.0, 2.0, 3.0);
-        let b = Vec3::init(4.0, 5.0, 7.0);
+        let a = Vec3::from_xyz(1.0, 2.0, 3.0);
+        let b = Vec3::from_xyz(4.0, 5.0, 7.0);
         let c = a.cross(&b);
-        assert_eq!(c, Vec3::init(-1.0, 5.0, -3.0));
+        assert_eq!(c, Vec3::from_xyz(-1.0, 5.0, -3.0));
     }
 
     #[test]
     fn div() {
-        let a = Vec3::init(1.0, 2.0, 3.0);
+        let a = Vec3::from_xyz(1.0, 2.0, 3.0);
         let b = &a / 2.0;
         let c = a / 2.0;
-        let res = Vec3::init(0.5, 1.0, 1.5);
+        let res = Vec3::from_xyz(0.5, 1.0, 1.5);
         assert_eq!(b, res);
         assert_eq!(c, res);
     }
 
     #[test]
     fn div_assign() {
-        let mut a = Vec3::init(1.0, 2.0, 3.0);
+        let mut a = Vec3::from_xyz(1.0, 2.0, 3.0);
         a /= 2.0;
-        assert_eq!(a, Vec3::init(0.5, 1.0, 1.5));
+        assert_eq!(a, Vec3::from_xyz(0.5, 1.0, 1.5));
     }
 
     #[test]
     fn dot() {
-        let a = Vec3::init(1.0, 2.0, 3.0);
-        let b = Vec3::init(4.0, 5.0, 6.0);
+        let a = Vec3::from_xyz(1.0, 2.0, 3.0);
+        let b = Vec3::from_xyz(4.0, 5.0, 6.0);
         assert!((a.dot(&b) - 32.0).abs() < f64::EPSILON);
     }
 
     #[test]
     fn fmt() {
-        let s = format!("{}", &Vec3::init(1.0, 2.0, 3.0));
+        let s = format!("{}", &Vec3::from_xyz(1.0, 2.0, 3.0));
         assert_eq!(s, "(1 2 3)");
     }
 
     #[test]
     fn mul() {
-        let a = Vec3::init(1.0, 2.0, 3.0);
-        let b = Vec3::init(4.0, 5.0, 6.0);
+        let a = Vec3::from_xyz(1.0, 2.0, 3.0);
+        let b = Vec3::from_xyz(4.0, 5.0, 6.0);
         let c = &a * &b;
         let d = a * b;
-        let res = Vec3::init(4.0, 10.0, 18.0);
+        let res = Vec3::from_xyz(4.0, 10.0, 18.0);
         assert_eq!(c, res);
         assert_eq!(d, res);
     }
 
     #[test]
     fn mul_f64() {
-        let a = Vec3::init(1.0, 2.0, 3.0);
+        let a = Vec3::from_xyz(1.0, 2.0, 3.0);
         let b = &a * 2.0;
         let c = a * 2.0;
-        let res = Vec3::init(2.0, 4.0, 6.0);
+        let res = Vec3::from_xyz(2.0, 4.0, 6.0);
         assert_eq!(b, res);
         assert_eq!(c, res);
     }
 
     #[test]
     fn mul_assign() {
-        let mut a = Vec3::init(1.0, 2.0, 3.0);
+        let mut a = Vec3::from_xyz(1.0, 2.0, 3.0);
         a *= 2.0;
-        assert_eq!(a, Vec3::init(2.0, 4.0, 6.0));
+        assert_eq!(a, Vec3::from_xyz(2.0, 4.0, 6.0));
     }
 
     #[test]
     fn neg() {
-        let a = Vec3::init(1.0, 2.0, 3.0);
-        let res = Vec3::init(-1.0, -2.0, -3.0);
+        let a = Vec3::from_xyz(1.0, 2.0, 3.0);
+        let res = Vec3::from_xyz(-1.0, -2.0, -3.0);
         assert_eq!(-&a, res);
         assert_eq!(-a, res);
     }
 
     #[test]
     fn sub() {
-        let a = Vec3::init(1.0, 2.0, 3.0);
-        let b = Vec3::init(1.0, 3.0, 5.0);
+        let a = Vec3::from_xyz(1.0, 2.0, 3.0);
+        let b = Vec3::from_xyz(1.0, 3.0, 5.0);
         let c = &a - &b;
         let d = a - b;
-        let res = Vec3::init(0.0, -1.0, -2.0);
+        let res = Vec3::from_xyz(0.0, -1.0, -2.0);
         assert_eq!(c, res);
         assert_eq!(d, res);
     }
 
     #[test]
     fn sub_assign() {
-        let mut a = Vec3::init(1.0, 2.0, 3.0);
-        let b = Vec3::init(1.0, 3.0, 5.0);
+        let mut a = Vec3::from_xyz(1.0, 2.0, 3.0);
+        let b = Vec3::from_xyz(1.0, 3.0, 5.0);
         a -= &b;
-        assert_eq!(a, Vec3::init(0.0, -1.0, -2.0));
+        assert_eq!(a, Vec3::from_xyz(0.0, -1.0, -2.0));
     }
 
     #[test]
     fn rgb() {
-        let a = Vec3::init(1.0, 2.0, 3.0);
+        let a = Vec3::from_xyz(1.0, 2.0, 3.0);
         assert!((a.r() - 1.0).abs() < f64::EPSILON);
         assert!((a.g() - 2.0).abs() < f64::EPSILON);
         assert!((a.b() - 3.0).abs() < f64::EPSILON);
@@ -457,7 +457,7 @@ mod test {
 
     #[test]
     fn index() {
-        let mut a = Vec3::init(4.0, 5.0, 6.0);
+        let mut a = Vec3::from_xyz(4.0, 5.0, 6.0);
         assert!((a[0] - 4.0).abs() < f64::EPSILON);
         assert!((a[1] - 5.0).abs() < f64::EPSILON);
         assert!((a[2] - 6.0).abs() < f64::EPSILON);
@@ -471,8 +471,39 @@ mod test {
 
     #[test]
     fn length() {
-        let a = Vec3::init(2.0, 3.0, 4.0);
+        let a = Vec3::from_xyz(2.0, 3.0, 4.0);
         assert!((a.length_squared() - 29.0).abs() < f64::EPSILON);
         assert!((a.length() - 29.0_f64.sqrt()).abs() < f64::EPSILON);
+    }
+
+    #[test]
+    fn is_valid_color() {
+        let valid = Vec3::from_xyz(9.0, 10.0, 0.1);
+        let invalid = Vec3::from_xyz(9.0, 10.2, 0.0);
+        assert!(valid.is_valid_color(10));
+        assert!(!invalid.is_valid_color(10));
+    }
+
+    #[test]
+    fn unit_vector() {
+        let a = Vec3::from_xyz(5.0, 4.0, 3.0);
+        assert_eq!(
+            a.unit_vector(),
+            Vec3::from_xyz(0.7071067811865475, 0.565685424949238, 0.4242640687119285)
+        );
+    }
+
+    #[test]
+    fn reflect() {
+        let a = Vec3::from_xyz(1.0, 2.0, 3.0);
+        let normal = Vec3::from_xyz(0.218218, 0.436436, 0.872872);
+        assert_eq!(
+            a.reflect(&normal),
+            Vec3::from_xyz(
+                -0.6190492478159999,
+                -1.2380984956319998,
+                -3.4761969912639996
+            )
+        );
     }
 }
