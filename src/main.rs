@@ -35,24 +35,28 @@ fn main() {
         // TODO
         panic!("image width % threads != 0");
     }
-    let rows_per_thread = image_height / num_threads;
+    let columns_per_thread = image_width / num_threads;
 
     let mut stdout = io::stdout();
 
-    let mut last_handle: Option<JoinHandle<Vec<Vec3>>> = None;
+    let mut last_handle: Option<JoinHandle<Vec<Vec<Vec3>>>> = None;
 
-    for n in (0..num_threads).rev() {
+    for n in 0..num_threads {
+        // split image up into vertical slices and render each one on its own thread
+
+        // the algorithm for splitting/combining horizontally instead of vertically is more striaght forward
+        // but it can lead to less even workloads when the upper 3rd of an image is blank horizon/sky
         let this_last_handle = if last_handle.is_some() {
             last_handle.take()
         } else {
             None
         };
         let handle = thread::spawn(move || {
-            let mut thread_colors = render_scene_slice(
+            let thread_colors = render_scene_slice(
                 aspect_ratio,
                 image_width,
                 image_height,
-                rows_per_thread,
+                columns_per_thread,
                 n,
                 samples_per_pixel,
                 max_depth,
@@ -62,16 +66,28 @@ fn main() {
 
             if let Some(h) = this_last_handle {
                 let mut last_colors = h.join().unwrap();
-                last_colors.append(&mut thread_colors);
+                last_colors.push(thread_colors);
                 last_colors
             } else {
-                thread_colors
+                vec![thread_colors]
             }
         });
         last_handle = Some(handle);
     }
 
-    let colors = last_handle.unwrap().join().unwrap();
+    let colors_by_slice = last_handle.unwrap().join().unwrap();
+
+    // Right now we have a vector of vertical slices, we need to flatten this into a single vector by taking chunks of slice_width from each vector and concating them together
+
+    let mut colors = Vec::with_capacity(image_width as usize * image_height as usize);
+
+    for n in 0..image_height {
+        for v in &colors_by_slice {
+            colors.extend_from_slice(
+                &v[(columns_per_thread * n) as usize..(columns_per_thread * (n + 1)) as usize],
+            );
+        }
+    }
 
     stdout
         .write_all(ppm::p6_image(image_width, image_height, &colors, samples_per_pixel).as_slice())
@@ -137,7 +153,7 @@ fn render_scene_slice(
         material: Rc::new(Lambertian::new(Vec3::from_xyz(0.8, 0.8, 0.8))),
     }));
 
-    let mut colors: Vec<Vec3> = Vec::with_capacity(slice_height as usize * image_width as usize);
+    let mut colors: Vec<Vec3> = Vec::with_capacity(slice_width as usize * image_height as usize);
 
     let mut rng = Pcg64Mcg::new(
         SystemTime::now()
@@ -146,10 +162,10 @@ fn render_scene_slice(
             .as_millis(),
     );
 
-    for j in (slice_height * slice_num..slice_height * (slice_num + 1)).rev() {
+    for j in (0..image_height).rev() {
         io::stderr().flush().unwrap();
 
-        for i in 0..image_width {
+        for i in slice_width * slice_num..slice_width * (slice_num + 1) {
             let mut pixel_color = Vec3::new();
             for _ in 0..samples_per_pixel {
                 let u = (f64::from(i) + rng.gen_range(0.0, 1.0)) / f64::from(image_width - 1);
