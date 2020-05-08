@@ -53,7 +53,7 @@ impl Vec3 {
     pub fn random_unit_vector<T: Rng>(rng: &mut T) -> Self {
         let a: f64 = rng.gen_range(0.0, 2.0 * std::f64::consts::PI);
         let z: f64 = rng.gen_range(-1.0, 1.0);
-        let r = (1.0 - z * z).sqrt();
+        let r = (-z.mul_add(z, 1.0)).sqrt();
 
         Self::from_xyz(r * a.cos(), r * a.sin(), z)
     }
@@ -102,9 +102,9 @@ impl Vec3 {
 
     pub fn cross(&self, rhs: &Self) -> Self {
         Self {
-            x: self.y * rhs.z - self.z * rhs.y,
-            y: self.z * rhs.x - self.x * rhs.z,
-            z: self.x * rhs.y - self.y * rhs.x,
+            x: self.y.mul_add(rhs.z, -self.z * rhs.y),
+            y: self.z.mul_add(rhs.x, -self.x * rhs.z),
+            z: self.x.mul_add(rhs.y, -self.y * rhs.x),
         }
     }
 
