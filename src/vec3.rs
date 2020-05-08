@@ -41,6 +41,15 @@ impl Vec3 {
         }
     }
 
+    pub fn random_in_unit_disk<T: Rng>(rng: &mut T) -> Self {
+        loop {
+            let v = Self::from_xyz(rng.gen_range(-1.0, 1.0), rng.gen_range(-1.0, 1.), 0.0);
+            if v.length_squared() < 1.0 {
+                return v;
+            }
+        }
+    }
+
     pub fn random_unit_vector<T: Rng>(rng: &mut T) -> Self {
         let a: f64 = rng.gen_range(0.0, 2.0 * std::f64::consts::PI);
         let z: f64 = rng.gen_range(-1.0, 1.0);

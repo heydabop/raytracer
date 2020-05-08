@@ -1,15 +1,29 @@
 use super::ray::Ray;
 use super::vec3::Vec3;
+use rand_pcg::Pcg64Mcg;
+use std::time::{SystemTime, UNIX_EPOCH};
 
 pub struct Camera {
     origin: Vec3,
     horizontal: Vec3,
     vertical: Vec3,
     lower_left_corner: Vec3,
+    lens_radius: f64,
+    rng: Pcg64Mcg,
+    u: Vec3,
+    v: Vec3,
 }
 
 impl Camera {
-    pub fn new(origin: Vec3, target: &Vec3, up: &Vec3, vfov_deg: f64, aspect_ratio: f64) -> Self {
+    pub fn new(
+        origin: Vec3,
+        target: &Vec3,
+        up: &Vec3,
+        vfov_deg: f64,
+        aspect_ratio: f64,
+        aperture: f64,
+        focus_dist: f64,
+    ) -> Self {
         let theta = vfov_deg.to_radians();
         let half_height = (theta / 2.0).tan();
         let half_width = half_height * aspect_ratio;
@@ -18,18 +32,33 @@ impl Camera {
         let v = w.cross(&u);
 
         Camera {
-            lower_left_corner: &origin - &(&u * half_width) - &v * half_height - w,
+            lower_left_corner: &origin
+                - &(&u * half_width * focus_dist)
+                - &v * half_height * focus_dist
+                - &w * focus_dist,
             origin,
-            horizontal: u * half_width * 2.0,
-            vertical: v * half_height * 2.0,
+            horizontal: &u * half_width * 2.0 * focus_dist,
+            vertical: &v * half_height * 2.0 * focus_dist,
+            lens_radius: aperture / 2.0,
+            rng: Pcg64Mcg::new(
+                SystemTime::now()
+                    .duration_since(UNIX_EPOCH)
+                    .unwrap()
+                    .as_millis(),
+            ),
+            u,
+            v,
         }
     }
 
-    pub fn ray(&self, u: f64, v: f64) -> Ray {
+    pub fn ray(&mut self, s: f64, t: f64) -> Ray {
+        let rd = Vec3::random_in_unit_disk(&mut self.rng) * self.lens_radius;
+        let offset = &self.u * rd.x + &self.v * rd.y;
         Ray {
-            origin: self.origin.clone(),
-            direction: &self.lower_left_corner + &self.horizontal * u + &self.vertical * v
-                - &self.origin,
+            origin: &self.origin + &offset,
+            direction: &self.lower_left_corner + &self.horizontal * s + &self.vertical * t
+                - &self.origin
+                - offset,
         }
     }
 }

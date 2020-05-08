@@ -33,8 +33,18 @@ fn main() {
     let cam_center = Vec3::from_xyz(-1.5, 0.8, 1.0);
     let cam_target = Vec3::from_xyz(0.0, 0.1, -1.0);
     let cam_up = Vec3::from_xyz(0.0, 1.0, 0.0);
+    let cam_focus_dist = (&cam_center - &cam_target).length();
+    let cam_aperture = 2.0;
 
-    let camera = Camera::new(cam_center, &cam_target, &cam_up, 50.0, aspect_ratio);
+    let mut camera = Camera::new(
+        cam_center,
+        &cam_target,
+        &cam_up,
+        50.0,
+        aspect_ratio,
+        cam_aperture,
+        cam_focus_dist,
+    );
 
     let mut scene = Scene::new();
     scene.add(Box::new(Sphere {
@@ -58,7 +68,7 @@ fn main() {
         material: Rc::new(Metal::new(Vec3::from_xyz(0.8, 0.6, 0.2), 0.1)),
     }));
     scene.add(Box::new(Sphere {
-        center: Vec3::from_xyz(-0.55, -0.302263, -2.4),
+        center: Vec3::from_xyz(-0.55, -0.302_263, -2.4),
         radius: 0.2,
         material: Rc::new(Lambertian::new(Vec3::from_xyz(0.9, 0.07, 0.05))),
     }));
