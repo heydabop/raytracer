@@ -22,14 +22,14 @@ use std::time::{Instant, SystemTime, UNIX_EPOCH};
 use vec3::Vec3;
 
 fn main() {
-    let num_threads = 8;
+    let num_threads = 16;
 
     let aspect_ratio = 16.0 / 9.0;
-    let image_width: u32 = 1920;
+    let image_width: u32 = 1920 * 2;
     #[allow(clippy::cast_sign_loss, clippy::cast_possible_truncation)]
     let image_height = (f64::from(image_width) / aspect_ratio).round() as u32;
-    let samples_per_pixel = 200;
-    let max_depth = 50;
+    let samples_per_pixel = 600;
+    let max_depth = 75;
 
     if image_width % num_threads != 0 {
         // TODO
