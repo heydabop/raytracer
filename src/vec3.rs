@@ -53,7 +53,7 @@ impl Vec3 {
     pub fn random_unit_vector<T: Rng>(rng: &mut T) -> Self {
         let a: f64 = rng.gen_range(0.0, 2.0 * std::f64::consts::PI);
         let z: f64 = rng.gen_range(-1.0, 1.0);
-        let r = (-z.mul_add(z, 1.0)).sqrt();
+        let r = (z.mul_add(-z, 1.0)).sqrt();
 
         Self::from_xyz(r * a.cos(), r * a.sin(), z)
     }
