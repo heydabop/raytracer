@@ -55,8 +55,6 @@ fn main() {
             None
         };
         let handle = thread::spawn(move || {
-            let now = Instant::now();
-
             let thread_colors = render_scene_slice(
                 aspect_ratio,
                 image_width,
@@ -66,12 +64,6 @@ fn main() {
                 samples_per_pixel,
                 max_depth,
                 scene_seed,
-            );
-
-            eprintln!(
-                "Thread {} finished in {:.3}s",
-                n,
-                now.elapsed().as_secs_f64()
             );
 
             if let Some(h) = this_last_handle {
@@ -117,6 +109,8 @@ fn render_scene_slice(
     max_depth: u16,
     scene_seed: u128,
 ) -> Vec<Vec3> {
+    let now = Instant::now();
+
     // Generating the camera, scene, and its contents thread local is much easier than sharing it, even for read only
 
     let cam_center = Vec3::from_xyz(13.0, 2.5, 3.5);
@@ -154,11 +148,17 @@ fn render_scene_slice(
         io::stderr().flush().unwrap();
 
         if j % tenth == 0 {
-            eprintln!(
-                "Thread {}: {:.0}%",
-                slice_num,
-                100.0 - (f64::from(j) / f64::from(image_height) * 100.0)
-            );
+            let percent = (f64::from(j) / f64::from(image_height))
+                .mul_add(-100.0, 100.0)
+                .round() as u32;
+            if percent != 100 {
+                eprintln!(
+                    "Thread {}: {}% in {:.3}s",
+                    slice_num,
+                    percent,
+                    now.elapsed().as_secs_f64()
+                );
+            }
         }
 
         for i in slice_width * slice_num..slice_width * (slice_num + 1) {
@@ -172,6 +172,12 @@ fn render_scene_slice(
             colors.push(pixel_color);
         }
     }
+
+    eprintln!(
+        "Thread {} finished in {:.3}s",
+        slice_num,
+        now.elapsed().as_secs_f64()
+    );
 
     colors
 }
