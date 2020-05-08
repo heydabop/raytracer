@@ -18,7 +18,7 @@ use sphere::Sphere;
 use std::io::{self, Write};
 use std::rc::Rc;
 use std::thread::{self, JoinHandle};
-use std::time::{SystemTime, UNIX_EPOCH};
+use std::time::{Instant, SystemTime, UNIX_EPOCH};
 use vec3::Vec3;
 
 fn main() {
@@ -55,6 +55,8 @@ fn main() {
             None
         };
         let handle = thread::spawn(move || {
+            let now = Instant::now();
+
             let thread_colors = render_scene_slice(
                 aspect_ratio,
                 image_width,
@@ -66,7 +68,11 @@ fn main() {
                 scene_seed,
             );
 
-            eprintln!("Thread {} finished", n);
+            eprintln!(
+                "Thread {} finished in {:.3}s",
+                n,
+                now.elapsed().as_secs_f64()
+            );
 
             if let Some(h) = this_last_handle {
                 let mut last_colors = h.join().unwrap();
