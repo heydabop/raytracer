@@ -17,10 +17,13 @@ use scene::Scene;
 use sphere::Sphere;
 use std::io::{self, Write};
 use std::rc::Rc;
+use std::thread::{self, JoinHandle};
 use std::time::{SystemTime, UNIX_EPOCH};
 use vec3::Vec3;
 
 fn main() {
+    let num_threads = 8;
+
     let aspect_ratio = 16.0 / 9.0;
     let image_width: u16 = 1280;
     #[allow(clippy::cast_sign_loss, clippy::cast_possible_truncation)]
@@ -28,8 +31,64 @@ fn main() {
     let samples_per_pixel = 200;
     let max_depth = 50;
 
+    if image_width % num_threads != 0 {
+        // TODO
+        panic!("image width % threads != 0");
+    }
+    let rows_per_thread = image_height / num_threads;
+
     let mut stdout = io::stdout();
 
+    let mut last_handle: Option<JoinHandle<Vec<Vec3>>> = None;
+
+    for n in (0..num_threads).rev() {
+        let this_last_handle = if last_handle.is_some() {
+            last_handle.take()
+        } else {
+            None
+        };
+        let handle = thread::spawn(move || {
+            let mut thread_colors = render_scene_slice(
+                aspect_ratio,
+                image_width,
+                image_height,
+                rows_per_thread,
+                n,
+                samples_per_pixel,
+                max_depth,
+            );
+
+            eprintln!("Thread {} finished", n);
+
+            if let Some(h) = this_last_handle {
+                let mut last_colors = h.join().unwrap();
+                last_colors.append(&mut thread_colors);
+                last_colors
+            } else {
+                thread_colors
+            }
+        });
+        last_handle = Some(handle);
+    }
+
+    let colors = last_handle.unwrap().join().unwrap();
+
+    stdout
+        .write_all(ppm::p6_image(image_width, image_height, &colors, samples_per_pixel).as_slice())
+        .unwrap();
+
+    eprintln!("\nDone.");
+}
+
+fn render_scene_slice(
+    aspect_ratio: f64,
+    image_width: u16,
+    image_height: u16,
+    slice_height: u16,
+    slice_num: u16,
+    samples_per_pixel: u16,
+    max_depth: u16,
+) -> Vec<Vec3> {
     let cam_center = Vec3::from_xyz(-1.5, 0.8, 1.0);
     let cam_target = Vec3::from_xyz(0.0, 0.1, -1.0);
     let cam_up = Vec3::from_xyz(0.0, 1.0, 0.0);
@@ -78,7 +137,7 @@ fn main() {
         material: Rc::new(Lambertian::new(Vec3::from_xyz(0.8, 0.8, 0.8))),
     }));
 
-    let mut colors: Vec<Vec3> = Vec::with_capacity(image_width as usize * image_height as usize);
+    let mut colors: Vec<Vec3> = Vec::with_capacity(slice_height as usize * image_width as usize);
 
     let mut rng = Pcg64Mcg::new(
         SystemTime::now()
@@ -87,8 +146,7 @@ fn main() {
             .as_millis(),
     );
 
-    for j in (0..image_height).rev() {
-        eprint!("\rScanlines remaining: {} ", j);
+    for j in (slice_height * slice_num..slice_height * (slice_num + 1)).rev() {
         io::stderr().flush().unwrap();
 
         for i in 0..image_width {
@@ -103,9 +161,5 @@ fn main() {
         }
     }
 
-    stdout
-        .write_all(ppm::p6_image(image_width, image_height, &colors, samples_per_pixel).as_slice())
-        .unwrap();
-
-    eprintln!("\nDone.");
+    colors
 }
