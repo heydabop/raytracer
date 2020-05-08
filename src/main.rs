@@ -78,7 +78,7 @@ fn main() {
         material: Rc::new(Lambertian::new(Vec3::from_xyz(0.8, 0.8, 0.8))),
     }));
 
-    let mut colors: Vec<Vec<Vec3>> = vec![];
+    let mut colors: Vec<Vec3> = Vec::with_capacity(image_width as usize * image_height as usize);
 
     let mut rng = Pcg64Mcg::new(
         SystemTime::now()
@@ -88,8 +88,6 @@ fn main() {
     );
 
     for j in (0..image_height).rev() {
-        let mut row: Vec<Vec3> = vec![];
-
         eprint!("\rScanlines remaining: {} ", j);
         io::stderr().flush().unwrap();
 
@@ -101,13 +99,12 @@ fn main() {
                 let r = camera.ray(u, v);
                 pixel_color += &r.color(&scene, &mut rng, max_depth);
             }
-            row.push(pixel_color);
+            colors.push(pixel_color);
         }
-        colors.push(row);
     }
 
     stdout
-        .write_all(ppm::p6_image(&colors, samples_per_pixel).as_slice())
+        .write_all(ppm::p6_image(image_width, image_height, &colors, samples_per_pixel).as_slice())
         .unwrap();
 
     eprintln!("\nDone.");

@@ -28,31 +28,30 @@ pub fn p3_pixel(color: &Vec3, samples_per_pixel: u16) -> String {
 }
 
 #[allow(dead_code)]
-pub fn p6_image(colors: &[Vec<Vec3>], samples_per_pixel: u16) -> Vec<u8> {
-    if colors.is_empty() || colors[0].is_empty() {
+pub fn p6_image(width: u16, height: u16, colors: &[Vec3], samples_per_pixel: u16) -> Vec<u8> {
+    if colors.is_empty() || colors.len() != width as usize * height as usize {
+        // TODO: error
         let mut image = vec![];
         image.extend_from_slice(b"P6 0 0 255\n");
         return image;
     }
-    let mut image = Vec::from(format!("P6 {} {} 255\n", colors[0].len(), colors.len()).as_bytes());
+    let mut image = Vec::from(format!("P6 {} {} 255\n", width, height).as_bytes());
 
-    for row in colors {
-        for color in row {
-            if !color.is_valid_color(samples_per_pixel) {
-                panic!("Color {} {} out of range", &color, samples_per_pixel)
-            }
+    for color in colors {
+        if !color.is_valid_color(samples_per_pixel) {
+            panic!("Color {} {} out of range", &color, samples_per_pixel)
+        }
 
-            let scale = 1.0 / f64::from(samples_per_pixel);
-            let r = color.r() * scale;
-            let g = color.g() * scale;
-            let b = color.b() * scale;
+        let scale = 1.0 / f64::from(samples_per_pixel);
+        let r = color.r() * scale;
+        let g = color.g() * scale;
+        let b = color.b() * scale;
 
-            #[allow(clippy::cast_sign_loss, clippy::cast_possible_truncation)]
-            {
-                image.push((256.0 * r.sqrt().clamp(0.0, 0.999)) as u8);
-                image.push((256.0 * g.sqrt().clamp(0.0, 0.999)) as u8);
-                image.push((256.0 * b.sqrt().clamp(0.0, 0.999)) as u8);
-            }
+        #[allow(clippy::cast_sign_loss, clippy::cast_possible_truncation)]
+        {
+            image.push((256.0 * r.sqrt().clamp(0.0, 0.999)) as u8);
+            image.push((256.0 * g.sqrt().clamp(0.0, 0.999)) as u8);
+            image.push((256.0 * b.sqrt().clamp(0.0, 0.999)) as u8);
         }
     }
 
@@ -79,19 +78,15 @@ mod test {
     #[test]
     fn p6_image() {
         let colors = vec![
-            vec![
-                Vec3::from_xyz(1.0, 0.0, 0.0),
-                Vec3::from_xyz(0.0, 1.0, 0.0),
-                Vec3::from_xyz(0.0, 0.0, 1.0),
-            ],
-            vec![
-                Vec3::from_xyz(0.5, 0.0, 0.0),
-                Vec3::from_xyz(0.0, 0.5, 0.0),
-                Vec3::from_xyz(0.0, 0.0, 0.5),
-            ],
+            Vec3::from_xyz(1.0, 0.0, 0.0),
+            Vec3::from_xyz(0.0, 1.0, 0.0),
+            Vec3::from_xyz(0.0, 0.0, 1.0),
+            Vec3::from_xyz(0.5, 0.0, 0.0),
+            Vec3::from_xyz(0.0, 0.5, 0.0),
+            Vec3::from_xyz(0.0, 0.0, 0.5),
         ];
         assert_eq!(
-            super::p6_image(&colors, 1),
+            super::p6_image(3, 2, &colors, 1),
             [
                 80, 54, 32, 51, 32, 50, 32, 50, 53, 53, 10, 255, 0, 0, 0, 255, 0, 0, 0, 255, 181,
                 0, 0, 0, 181, 0, 0, 0, 181
