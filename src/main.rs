@@ -93,7 +93,7 @@ fn render_scene_slice(
     let cam_target = Vec3::from_xyz(0.0, 0.1, -1.0);
     let cam_up = Vec3::from_xyz(0.0, 1.0, 0.0);
     let cam_focus_dist = (&cam_center - &cam_target).length();
-    let cam_aperture = 2.0;
+    let cam_aperture = 0.1;
 
     let mut camera = Camera::new(
         cam_center,
