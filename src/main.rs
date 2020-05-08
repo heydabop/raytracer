@@ -119,17 +119,18 @@ fn render_scene_slice(
 ) -> Vec<Vec3> {
     // Generating the camera, scene, and its contents thread local is much easier than sharing it, even for read only
 
-    let cam_center = Vec3::from_xyz(13.0, 2.0, 3.0);
+    let cam_center = Vec3::from_xyz(13.0, 2.5, 3.5);
     let cam_target = Vec3::from_xyz(0.0, 0.0, 0.0);
     let cam_up = Vec3::from_xyz(0.0, 1.0, 0.0);
     let cam_focus_dist = 10.0;
     let cam_aperture = 0.1;
+    let cam_vfov = 20.0;
 
     let mut camera = Camera::new(
         cam_center,
         &cam_target,
         &cam_up,
-        50.0,
+        cam_vfov,
         aspect_ratio,
         cam_aperture,
         cam_focus_dist,
@@ -179,8 +180,10 @@ fn random_spheres(scene_seed: u128) -> Scene {
 
     let intersection_check = Vec3::from_xyz(4.0, 0.2, 0.0);
 
-    for a in -11..11 {
-        for b in -11..11 {
+    let gen_width = 11;
+
+    for a in -gen_width..gen_width {
+        for b in -gen_width..gen_width {
             let choose_material: f64 = rng.gen();
             let x = rng.gen::<f64>().mul_add(0.9, f64::from(a));
             let z = rng.gen::<f64>().mul_add(0.9, f64::from(b));
