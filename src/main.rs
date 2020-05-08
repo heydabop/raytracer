@@ -148,8 +148,18 @@ fn render_scene_slice(
             + u128::from(slice_num),
     );
 
+    let tenth = image_height / 10;
+
     for j in (0..image_height).rev() {
         io::stderr().flush().unwrap();
+
+        if j % tenth == 0 {
+            eprintln!(
+                "Thread {}: {:.0}%",
+                slice_num,
+                100.0 - (f64::from(j) / f64::from(image_height) * 100.0)
+            );
+        }
 
         for i in slice_width * slice_num..slice_width * (slice_num + 1) {
             let mut pixel_color = Vec3::new();
