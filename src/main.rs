@@ -37,7 +37,10 @@ fn main() {
     }
     let columns_per_thread = image_width / num_threads;
 
-    let mut stdout = io::stdout();
+    let scene_seed = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap()
+        .as_millis();
 
     let mut last_handle: Option<JoinHandle<Vec<Vec<Vec3>>>> = None;
 
@@ -60,6 +63,7 @@ fn main() {
                 n,
                 samples_per_pixel,
                 max_depth,
+                scene_seed,
             );
 
             eprintln!("Thread {} finished", n);
@@ -89,13 +93,14 @@ fn main() {
         }
     }
 
-    stdout
+    io::stdout()
         .write_all(ppm::p6_image(image_width, image_height, &colors, samples_per_pixel).as_slice())
         .unwrap();
 
     eprintln!("\nDone.");
 }
 
+#[allow(clippy::too_many_arguments)]
 fn render_scene_slice(
     aspect_ratio: f64,
     image_width: u32,
@@ -104,11 +109,14 @@ fn render_scene_slice(
     slice_num: u32,
     samples_per_pixel: u16,
     max_depth: u16,
+    scene_seed: u128,
 ) -> Vec<Vec3> {
-    let cam_center = Vec3::from_xyz(-1.5, 0.8, 1.0);
-    let cam_target = Vec3::from_xyz(0.0, 0.1, -1.0);
+    // Generating the camera, scene, and its contents thread local is much easier than sharing it, even for read only
+
+    let cam_center = Vec3::from_xyz(13.0, 2.0, 3.0);
+    let cam_target = Vec3::from_xyz(0.0, 0.0, 0.0);
     let cam_up = Vec3::from_xyz(0.0, 1.0, 0.0);
-    let cam_focus_dist = (&cam_center - &cam_target).length();
+    let cam_focus_dist = 10.0;
     let cam_aperture = 0.1;
 
     let mut camera = Camera::new(
@@ -121,37 +129,7 @@ fn render_scene_slice(
         cam_focus_dist,
     );
 
-    let mut scene = Scene::new();
-    scene.add(Box::new(Sphere {
-        center: Vec3::from_xyz(0.0, 0.0, -1.0),
-        radius: 0.5,
-        material: Rc::new(Lambertian::new(Vec3::from_xyz(0.1, 0.2, 0.5))),
-    }));
-    scene.add(Box::new(Sphere {
-        center: Vec3::from_xyz(0.0, -500.5, -1.0),
-        radius: 500.0,
-        material: Rc::new(Lambertian::new(Vec3::from_xyz(0.8, 0.8, 0.0))),
-    }));
-    scene.add(Box::new(Sphere {
-        center: Vec3::from_xyz(-1.0, 0.0, -1.0),
-        radius: 0.5,
-        material: Rc::new(Dielectric::new(1.5)),
-    }));
-    scene.add(Box::new(Sphere {
-        center: Vec3::from_xyz(1.0, 0.0, -1.0),
-        radius: 0.5,
-        material: Rc::new(Metal::new(Vec3::from_xyz(0.8, 0.6, 0.2), 0.1)),
-    }));
-    scene.add(Box::new(Sphere {
-        center: Vec3::from_xyz(-0.55, -0.302_263, -2.4),
-        radius: 0.2,
-        material: Rc::new(Lambertian::new(Vec3::from_xyz(0.9, 0.07, 0.05))),
-    }));
-    scene.add(Box::new(Sphere {
-        center: Vec3::from_xyz(-1.4, 0.0868, 1.2),
-        radius: 0.58,
-        material: Rc::new(Lambertian::new(Vec3::from_xyz(0.8, 0.8, 0.8))),
-    }));
+    let scene = random_spheres(scene_seed);
 
     let mut colors: Vec<Vec3> = Vec::with_capacity(slice_width as usize * image_height as usize);
 
@@ -159,7 +137,8 @@ fn render_scene_slice(
         SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .unwrap()
-            .as_millis(),
+            .as_millis()
+            + u128::from(slice_num),
     );
 
     for j in (0..image_height).rev() {
@@ -178,4 +157,71 @@ fn render_scene_slice(
     }
 
     colors
+}
+
+fn random_spheres(scene_seed: u128) -> Scene {
+    let mut scene = Scene::new();
+    scene.add(Box::new(Sphere {
+        center: Vec3::from_xyz(0.0, -1000.0, 0.0),
+        radius: 1000.0,
+        material: Rc::new(Lambertian::new(Vec3::from_xyz(0.5, 0.5, 0.5))),
+    }));
+
+    let mut rng = Pcg64Mcg::new(scene_seed);
+
+    let intersection_check = Vec3::from_xyz(4.0, 0.2, 0.0);
+
+    for a in -11..11 {
+        for b in -11..11 {
+            let choose_material: f64 = rng.gen();
+            let center = Vec3::from_xyz(
+                f64::from(a) + 0.9 * rng.gen::<f64>(),
+                0.2,
+                f64::from(b) + 0.9 * rng.gen::<f64>(),
+            );
+            if (&center - &intersection_check).length() > 0.9 {
+                if choose_material < 0.8 {
+                    let albedo =
+                        Vec3::random(&mut rng, 0.0, 1.0) * Vec3::random(&mut rng, 0.0, 1.0);
+                    scene.add(Box::new(Sphere {
+                        center,
+                        radius: 0.2,
+                        material: Rc::new(Lambertian::new(albedo)),
+                    }));
+                } else if choose_material < 0.95 {
+                    let albedo = Vec3::random(&mut rng, 0.5, 1.0);
+                    let fuzz = rng.gen_range(0.0, 0.5);
+                    scene.add(Box::new(Sphere {
+                        center,
+                        radius: 0.2,
+                        material: Rc::new(Metal::new(albedo, fuzz)),
+                    }));
+                } else {
+                    scene.add(Box::new(Sphere {
+                        center,
+                        radius: 0.2,
+                        material: Rc::new(Dielectric::new(1.5)),
+                    }));
+                }
+            }
+        }
+    }
+
+    scene.add(Box::new(Sphere {
+        center: Vec3::from_xyz(0.0, 1.0, 0.0),
+        radius: 1.0,
+        material: Rc::new(Dielectric::new(1.5)),
+    }));
+    scene.add(Box::new(Sphere {
+        center: Vec3::from_xyz(-4.0, 1.0, 0.0),
+        radius: 1.0,
+        material: Rc::new(Lambertian::new(Vec3::from_xyz(0.4, 0.2, 0.1))),
+    }));
+    scene.add(Box::new(Sphere {
+        center: Vec3::from_xyz(4.0, 1.0, 0.0),
+        radius: 1.0,
+        material: Rc::new(Metal::new(Vec3::from_xyz(0.7, 0.6, 0.5), 0.0)),
+    }));
+
+    scene
 }
