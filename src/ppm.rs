@@ -28,7 +28,7 @@ pub fn p3_pixel(color: &Vec3, samples_per_pixel: u16) -> String {
 }
 
 #[allow(dead_code)]
-pub fn p6_image(width: u16, height: u16, colors: &[Vec3], samples_per_pixel: u16) -> Vec<u8> {
+pub fn p6_image(width: u32, height: u32, colors: &[Vec3], samples_per_pixel: u16) -> Vec<u8> {
     if colors.is_empty() || colors.len() != width as usize * height as usize {
         // TODO: error
         let mut image = vec![];

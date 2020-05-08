@@ -25,9 +25,9 @@ fn main() {
     let num_threads = 8;
 
     let aspect_ratio = 16.0 / 9.0;
-    let image_width: u16 = 1280;
+    let image_width: u32 = 1920;
     #[allow(clippy::cast_sign_loss, clippy::cast_possible_truncation)]
-    let image_height = (f64::from(image_width) / aspect_ratio).round() as u16;
+    let image_height = (f64::from(image_width) / aspect_ratio).round() as u32;
     let samples_per_pixel = 200;
     let max_depth = 50;
 
@@ -82,10 +82,10 @@ fn main() {
 
 fn render_scene_slice(
     aspect_ratio: f64,
-    image_width: u16,
-    image_height: u16,
-    slice_height: u16,
-    slice_num: u16,
+    image_width: u32,
+    image_height: u32,
+    slice_width: u32,
+    slice_num: u32,
     samples_per_pixel: u16,
     max_depth: u16,
 ) -> Vec<Vec3> {
