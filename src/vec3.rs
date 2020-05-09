@@ -78,7 +78,7 @@ impl Vec3 {
         self.z
     }
 
-    pub fn is_valid_color(&self, samples: u16) -> bool {
+    pub fn is_valid_color(&self, samples: u32) -> bool {
         let scale = 1.0 / f64::from(samples);
         let x = self.x * scale;
         let y = self.y * scale;

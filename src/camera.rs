@@ -1,7 +1,6 @@
 use super::ray::Ray;
 use super::vec3::Vec3;
 use rand_pcg::Pcg64Mcg;
-use std::time::{SystemTime, UNIX_EPOCH};
 
 pub struct Camera {
     origin: Vec3,
@@ -9,7 +8,6 @@ pub struct Camera {
     vertical: Vec3,
     lower_left_corner: Vec3,
     lens_radius: f64,
-    rng: Pcg64Mcg,
     u: Vec3,
     v: Vec3,
 }
@@ -40,19 +38,13 @@ impl Camera {
             horizontal: &u * half_width * 2.0 * focus_dist,
             vertical: &v * half_height * 2.0 * focus_dist,
             lens_radius: aperture / 2.0,
-            rng: Pcg64Mcg::new(
-                SystemTime::now()
-                    .duration_since(UNIX_EPOCH)
-                    .unwrap()
-                    .as_millis(),
-            ),
             u,
             v,
         }
     }
 
-    pub fn ray(&mut self, s: f64, t: f64) -> Ray {
-        let rd = Vec3::random_in_unit_disk(&mut self.rng) * self.lens_radius;
+    pub fn ray(&mut self, mut rng: &mut Pcg64Mcg, s: f64, t: f64) -> Ray {
+        let rd = Vec3::random_in_unit_disk(&mut rng) * self.lens_radius;
         let offset = &self.u * rd.x + &self.v * rd.y;
         Ray {
             origin: &self.origin + &offset,

@@ -18,81 +18,71 @@ use sphere::Sphere;
 use std::io::{self, Write};
 use std::rc::Rc;
 use std::thread::{self, JoinHandle};
-use std::time::{Instant, SystemTime, UNIX_EPOCH};
+use std::time::{SystemTime, UNIX_EPOCH};
 use vec3::Vec3;
 
 fn main() {
-    let num_threads = 16;
+    let num_threads = 8;
 
     let aspect_ratio = 16.0 / 9.0;
-    let image_width: u32 = 1920 * 2;
+    let image_width: u32 = 1280;
     #[allow(clippy::cast_sign_loss, clippy::cast_possible_truncation)]
     let image_height = (f64::from(image_width) / aspect_ratio).round() as u32;
-    let samples_per_pixel = 600;
-    let max_depth = 75;
-
-    if image_width % num_threads != 0 {
-        // TODO
-        panic!("image width % threads != 0");
-    }
-    let columns_per_thread = image_width / num_threads;
+    let samples_per_thread = 200 / num_threads;
+    let max_depth = 50;
 
     let scene_seed = SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .unwrap()
         .as_millis();
 
-    let mut last_handle: Option<JoinHandle<Vec<Vec<Vec3>>>> = None;
+    let mut last_handle: Option<JoinHandle<Vec<Vec3>>> = None;
 
     for n in 0..num_threads {
-        // split image up into vertical slices and render each one on its own thread
+        // render image once per thread and average out the images
 
-        // the algorithm for splitting/combining horizontally instead of vertically is more striaght forward
-        // but it can lead to less even workloads when the upper 3rd of an image is blank horizon/sky
+        // each thread adds its colors to the running vector of colors from the last thread
+        // we then divide colors by total samples during image gen to get averaged color
         let this_last_handle = if last_handle.is_some() {
             last_handle.take()
         } else {
             None
         };
+
         let handle = thread::spawn(move || {
-            let thread_colors = render_scene_slice(
+            let mut thread_colors = render_scene_slice(
                 aspect_ratio,
                 image_width,
                 image_height,
-                columns_per_thread,
                 n,
-                samples_per_pixel,
+                samples_per_thread,
                 max_depth,
                 scene_seed,
             );
 
             if let Some(h) = this_last_handle {
-                let mut last_colors = h.join().unwrap();
-                last_colors.push(thread_colors);
-                last_colors
-            } else {
-                vec![thread_colors]
+                let last_colors = h.join().unwrap();
+                for i in 0..thread_colors.len() {
+                    thread_colors[i] += &last_colors[i]
+                }
             }
+            thread_colors
         });
         last_handle = Some(handle);
     }
 
-    let colors_by_slice = last_handle.unwrap().join().unwrap();
-
-    // Right now we have a vector of vertical slices, we need to flatten this into a single vector by taking chunks of slice_width from each vector and concating them together
-
-    let mut colors = Vec::with_capacity(image_width as usize * image_height as usize);
-
-    for n in 0..image_height {
-        for v in &colors_by_slice {
-            colors.extend_from_slice(
-                &v[(columns_per_thread * n) as usize..(columns_per_thread * (n + 1)) as usize],
-            );
-        }
-    }
+    let colors = last_handle.unwrap().join().unwrap();
 
     io::stdout()
-        .write_all(ppm::p6_image(image_width, image_height, &colors, samples_per_pixel).as_slice())
+        .write_all(
+            ppm::p6_image(
+                image_width,
+                image_height,
+                &colors,
+                samples_per_thread * num_threads,
+            )
+            .as_slice(),
+        )
         .unwrap();
 
     eprintln!("\nDone.");
@@ -103,14 +93,11 @@ fn render_scene_slice(
     aspect_ratio: f64,
     image_width: u32,
     image_height: u32,
-    slice_width: u32,
     slice_num: u32,
-    samples_per_pixel: u16,
+    samples_per_pixel: u32,
     max_depth: u16,
     scene_seed: u128,
 ) -> Vec<Vec3> {
-    let now = Instant::now();
-
     // Generating the camera, scene, and its contents thread local is much easier than sharing it, even for read only
 
     let cam_center = Vec3::from_xyz(13.0, 2.5, 3.5);
@@ -132,52 +119,32 @@ fn render_scene_slice(
 
     let scene = random_spheres(scene_seed);
 
-    let mut colors: Vec<Vec3> = Vec::with_capacity(slice_width as usize * image_height as usize);
+    let mut colors: Vec<Vec3> = Vec::with_capacity(image_width as usize * image_height as usize);
 
     let mut rng = Pcg64Mcg::new(
         SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .unwrap()
-            .as_millis()
+            .as_nanos()
             + u128::from(slice_num),
     );
 
-    let tenth = image_height / 10;
-
     for j in (0..image_height).rev() {
-        io::stderr().flush().unwrap();
-
-        if j % tenth == 0 {
-            let percent = (f64::from(j) / f64::from(image_height))
-                .mul_add(-100.0, 100.0)
-                .round() as u32;
-            if percent != 100 {
-                eprintln!(
-                    "Thread {}: {}% in {:.3}s",
-                    slice_num,
-                    percent,
-                    now.elapsed().as_secs_f64()
-                );
-            }
+        if slice_num == 0 {
+            eprint!("\rScanlines remaining: {} ", j);
         }
 
-        for i in slice_width * slice_num..slice_width * (slice_num + 1) {
+        for i in 0..image_width {
             let mut pixel_color = Vec3::new();
             for _ in 0..samples_per_pixel {
                 let u = (f64::from(i) + rng.gen_range(0.0, 1.0)) / f64::from(image_width - 1);
                 let v = (f64::from(j) + rng.gen_range(0.0, 1.0)) / f64::from(image_height - 1);
-                let r = camera.ray(u, v);
+                let r = camera.ray(&mut rng, u, v);
                 pixel_color += &r.color(&scene, &mut rng, max_depth);
             }
             colors.push(pixel_color);
         }
     }
-
-    eprintln!(
-        "Thread {} finished in {:.3}s",
-        slice_num,
-        now.elapsed().as_secs_f64()
-    );
 
     colors
 }
