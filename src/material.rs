@@ -33,11 +33,12 @@ impl Lambertian {
 }
 
 impl Material for Lambertian {
-    fn scatter(&self, _: &Ray, mut rng: &mut Pcg64Mcg, hit: &HitData) -> Option<Scatter> {
+    fn scatter(&self, r_in: &Ray, mut rng: &mut Pcg64Mcg, hit: &HitData) -> Option<Scatter> {
         let scatter_direction = &hit.normal + Vec3::random_unit_vector(&mut rng);
         let scattered_ray = Ray {
             origin: hit.point.clone(),
             direction: scatter_direction,
+            time: r_in.time,
         };
 
         Some(Scatter {
@@ -74,6 +75,7 @@ impl Material for Metal {
             let scattered = Ray {
                 origin: hit.point.clone(),
                 direction: reflected + Vec3::random_in_unit_sphere(&mut rng) * self.fuzz,
+                time: r_in.time,
             };
             return Some(Scatter {
                 ray: scattered,
@@ -123,6 +125,7 @@ impl Material for Dielectric {
             let scattered = Ray {
                 origin: hit.point.clone(),
                 direction: reflected,
+                time: r_in.time,
             };
             return Some(Scatter {
                 ray: scattered,
@@ -134,6 +137,7 @@ impl Material for Dielectric {
         let scattered = Ray {
             origin: hit.point.clone(),
             direction: refracted,
+            time: r_in.time,
         };
 
         Some(Scatter {

@@ -6,6 +6,7 @@ use rand_pcg::Pcg64Mcg;
 pub struct Ray {
     pub origin: Vec3,
     pub direction: Vec3,
+    pub time: f64,
 }
 
 impl Ray {
@@ -14,6 +15,7 @@ impl Ray {
         Self {
             origin: Vec3::new(),
             direction: Vec3::new(),
+            time: 0.0,
         }
     }
 
@@ -54,6 +56,7 @@ mod test {
         let a = Ray {
             origin: Vec3::from_xyz(0.0, -1.0, -2.0),
             direction: Vec3::from_xyz(1.0, 2.0, 3.0),
+            time: 0.0,
         };
         let b = &a.at(2.5);
         assert_eq!(b, &Vec3::from_xyz(2.5, 4.0, 5.5));

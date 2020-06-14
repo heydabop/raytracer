@@ -3,6 +3,7 @@
 mod camera;
 mod hit;
 mod material;
+mod moving_sphere;
 mod ppm;
 mod ray;
 mod scene;
@@ -11,6 +12,7 @@ mod vec3;
 
 use camera::Camera;
 use material::{Dielectric, Lambertian, Metal};
+use moving_sphere::MovingSphere;
 use rand::prelude::*;
 use rand_pcg::Pcg64Mcg;
 use scene::Scene;
@@ -28,7 +30,7 @@ fn main() {
     let image_width: u32 = 1280;
     #[allow(clippy::cast_sign_loss, clippy::cast_possible_truncation)]
     let image_height = (f64::from(image_width) / aspect_ratio).round() as u32;
-    let samples_per_thread = 200 / num_threads;
+    let samples_per_thread = 50 / num_threads;
     let max_depth = 50;
 
     let scene_seed = SystemTime::now()
@@ -104,8 +106,10 @@ fn render_scene_slice(
     let cam_target = Vec3::from_xyz(0.0, 0.0, 0.0);
     let cam_up = Vec3::from_xyz(0.0, 1.0, 0.0);
     let cam_focus_dist = 10.0;
-    let cam_aperture = 0.1;
+    let cam_aperture = 0.0;
     let cam_vfov = 20.0;
+    let cam_t1 = 0.0;
+    let cam_t2 = 1.0;
 
     let mut camera = Camera::new(
         cam_center,
@@ -115,6 +119,8 @@ fn render_scene_slice(
         aspect_ratio,
         cam_aperture,
         cam_focus_dist,
+        cam_t1,
+        cam_t2,
     );
 
     let scene = random_spheres(scene_seed);
@@ -178,8 +184,12 @@ fn random_spheres(scene_seed: u128) -> Scene {
                 if choose_material < 0.8 {
                     let albedo =
                         Vec3::random(&mut rng, 0.0, 1.0) * Vec3::random(&mut rng, 0.0, 1.0);
-                    scene.add(Box::new(Sphere {
-                        center,
+                    let center1 = &center + Vec3::from_xyz(0.0, rng.gen_range(0.0, 0.5), 0.0);
+                    scene.add(Box::new(MovingSphere {
+                        center0: center,
+                        center1,
+                        time0: 0.0,
+                        time1: 1.0,
                         radius,
                         material: Rc::new(Lambertian::new(albedo)),
                     }));

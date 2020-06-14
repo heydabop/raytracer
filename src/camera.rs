@@ -1,5 +1,6 @@
 use super::ray::Ray;
 use super::vec3::Vec3;
+use rand::Rng;
 use rand_pcg::Pcg64Mcg;
 
 pub struct Camera {
@@ -10,9 +11,12 @@ pub struct Camera {
     lens_radius: f64,
     u: Vec3,
     v: Vec3,
+    time0: f64,
+    time1: f64,
 }
 
 impl Camera {
+    #[allow(clippy::too_many_arguments)]
     pub fn new(
         origin: Vec3,
         target: &Vec3,
@@ -21,6 +25,8 @@ impl Camera {
         aspect_ratio: f64,
         aperture: f64,
         focus_dist: f64,
+        time0: f64,
+        time1: f64,
     ) -> Self {
         let theta = vfov_deg.to_radians();
         let half_height = (theta / 2.0).tan();
@@ -40,6 +46,8 @@ impl Camera {
             lens_radius: aperture / 2.0,
             u,
             v,
+            time0,
+            time1,
         }
     }
 
@@ -51,6 +59,7 @@ impl Camera {
             direction: &self.lower_left_corner + &self.horizontal * s + &self.vertical * t
                 - &self.origin
                 - offset,
+            time: rng.gen_range(self.time0, self.time1),
         }
     }
 }

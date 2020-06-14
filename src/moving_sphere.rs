@@ -5,24 +5,35 @@ use super::vec3::Vec3;
 use std::rc::Rc;
 
 #[derive(Debug)]
-pub struct Sphere {
-    pub center: Vec3,
+pub struct MovingSphere {
+    pub center0: Vec3,
+    pub center1: Vec3,
+    pub time0: f64,
+    pub time1: f64,
     pub radius: f64,
     pub material: Rc<dyn MaterialWritable>,
 }
 
-impl Sphere {
+impl MovingSphere {
     pub fn new() -> Self {
         Self {
-            center: Vec3::new(),
+            center0: Vec3::new(),
+            center1: Vec3::new(),
+            time0: 0.0,
+            time1: 0.0,
             radius: 0.0,
             material: Rc::new(Lambertian::new(Vec3::from_xyz(0.5, 0.5, 0.5))),
         }
     }
 
+    pub fn center(&self, time: f64) -> Vec3 {
+        &self.center0
+            + (&self.center1 - &self.center0) * ((time - self.time0) / (self.time1 - self.time0))
+    }
+
     fn compute_hit(&self, r: &Ray, t: f64) -> Hit {
         let point = r.at(t);
-        let mut normal = (&point - &self.center) / self.radius;
+        let mut normal = (&point - &self.center(r.time)) / self.radius;
         let front_face = if r.direction.dot(&normal) > 0.0 {
             // ray is coming from inside the sphere
             normal = -normal;
@@ -40,15 +51,15 @@ impl Sphere {
     }
 }
 
-impl Default for Sphere {
+impl Default for MovingSphere {
     fn default() -> Self {
-        Sphere::new()
+        MovingSphere::new()
     }
 }
 
-impl Hittable for Sphere {
+impl Hittable for MovingSphere {
     fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Hit {
-        let oc = &r.origin - &self.center;
+        let oc = &r.origin - &self.center(r.time);
         let a = r.direction.length_squared();
         let half_b = oc.dot(&r.direction);
         let c = (-self.radius).mul_add(self.radius, oc.length_squared());
@@ -70,7 +81,7 @@ impl Hittable for Sphere {
     }
 }
 
-impl Hittable for &Sphere {
+impl Hittable for &MovingSphere {
     fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Hit {
         (*self).hit(r, t_min, t_max)
     }
@@ -79,12 +90,15 @@ impl Hittable for &Sphere {
 #[cfg(test)]
 #[allow(clippy::unreadable_literal)]
 mod test {
-    use super::{Hit, HitData, Hittable, Lambertian, Ray, Rc, Sphere, Vec3};
+    use super::{Hit, HitData, Hittable, Lambertian, MovingSphere, Ray, Rc, Vec3};
 
     #[test]
     fn hit() {
-        let s = &Sphere {
-            center: Vec3::from_xyz(0.0, 0.0, 1.0),
+        let s = &MovingSphere {
+            center0: Vec3::from_xyz(0.0, 0.0, 1.0),
+            center1: Vec3::from_xyz(0.0, 0.0, 1.0),
+            time0: 0.0,
+            time1: 1.0,
             radius: 0.5,
             material: Rc::new(Lambertian::new(Vec3::from_xyz(0.5, 0.5, 0.5))),
         };
