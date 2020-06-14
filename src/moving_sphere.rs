@@ -96,7 +96,7 @@ mod test {
     fn hit() {
         let s = &MovingSphere {
             center0: Vec3::from_xyz(0.0, 0.0, 1.0),
-            center1: Vec3::from_xyz(0.0, 0.0, 1.0),
+            center1: Vec3::from_xyz(0.0, 0.0, 2.0),
             time0: 0.0,
             time1: 1.0,
             radius: 0.5,
@@ -116,6 +116,11 @@ mod test {
             origin: Vec3::new(),
             direction: Vec3::from_xyz(0.0, 0.7, 1.0),
             time: 0.0,
+        };
+        let miss_time_ray = Ray {
+            origin: Vec3::new(),
+            direction: Vec3::from_xyz(0.0, 0.7, 1.0),
+            time: 1.0,
         };
         assert_eq!(
             s.hit(&hit_ray, 0.0, 2.0),
@@ -155,5 +160,6 @@ mod test {
         );
         assert_eq!(s.hit(&hit_ray, 0.0, 0.5), Hit::Miss);
         assert_eq!(s.hit(&miss_ray, 0.0, 10.0), Hit::Miss);
+        assert_eq!(s.hit(&miss_time_ray, 0.0, 10.0), Hit::Miss);
     }
 }
