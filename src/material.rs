@@ -1,4 +1,4 @@
-use super::hit::HitData;
+use super::hit::Hit;
 use super::ray::Ray;
 use super::vec3::Vec3;
 use rand::Rng;
@@ -12,7 +12,7 @@ pub struct Scatter {
 
 pub trait Material {
     // Returns (if ray scatters) new scattered ray and attenuation of ray
-    fn scatter(&self, r_in: &Ray, rng: &mut Pcg64Mcg, hit: &HitData) -> Option<Scatter>;
+    fn scatter(&self, r_in: &Ray, rng: &mut Pcg64Mcg, hit: &Hit) -> Option<Scatter>;
 }
 
 #[allow(clippy::module_name_repetitions)]
@@ -33,7 +33,7 @@ impl Lambertian {
 }
 
 impl Material for Lambertian {
-    fn scatter(&self, r_in: &Ray, mut rng: &mut Pcg64Mcg, hit: &HitData) -> Option<Scatter> {
+    fn scatter(&self, r_in: &Ray, mut rng: &mut Pcg64Mcg, hit: &Hit) -> Option<Scatter> {
         let scatter_direction = &hit.normal + Vec3::random_unit_vector(&mut rng);
         let scattered_ray = Ray {
             origin: hit.point.clone(),
@@ -69,7 +69,7 @@ impl Metal {
 }
 
 impl Material for Metal {
-    fn scatter(&self, r_in: &Ray, mut rng: &mut Pcg64Mcg, hit: &HitData) -> Option<Scatter> {
+    fn scatter(&self, r_in: &Ray, mut rng: &mut Pcg64Mcg, hit: &Hit) -> Option<Scatter> {
         let reflected = r_in.direction.unit_vector().reflect(&hit.normal);
         if reflected.dot(&hit.normal) > 0.0 {
             let scattered = Ray {
@@ -109,7 +109,7 @@ impl Dielectric {
 }
 
 impl Material for Dielectric {
-    fn scatter(&self, r_in: &Ray, rng: &mut Pcg64Mcg, hit: &HitData) -> Option<Scatter> {
+    fn scatter(&self, r_in: &Ray, rng: &mut Pcg64Mcg, hit: &Hit) -> Option<Scatter> {
         let attenuation = Vec3::from_xyz(1.0, 1.0, 1.0);
         let eta_ratio = if hit.front_face {
             1.0 / self.refraction_index

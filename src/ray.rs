@@ -1,4 +1,4 @@
-use super::hit::{Hit, Hittable};
+use super::hit::Hittable;
 use super::vec3::Vec3;
 use rand_pcg::Pcg64Mcg;
 
@@ -28,7 +28,7 @@ impl Ray {
             return Vec3::default();
         }
 
-        if let Hit::Hit(hit) = hittable.hit(self, 0.001, f64::INFINITY) {
+        if let Some(hit) = hittable.hit(self, 0.001, f64::INFINITY) {
             if let Some(scatter) = hit.material.scatter(self, &mut rng, &hit) {
                 return scatter.attenuation * scatter.ray.color(hittable, &mut rng, depth - 1);
             }

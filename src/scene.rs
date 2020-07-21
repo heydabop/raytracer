@@ -22,14 +22,14 @@ impl Default for Scene {
 }
 
 impl Hittable for Scene {
-    fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Hit {
-        let mut hit = Hit::Miss;
+    fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<Hit> {
+        let mut hit = None;
         let mut closest = t_max;
 
         for obj in &self.objects {
-            if let Hit::Hit(obj_hit) = obj.hit(r, t_min, closest) {
+            if let Some(obj_hit) = obj.hit(r, t_min, closest) {
                 closest = obj_hit.t;
-                hit = Hit::Hit(obj_hit);
+                hit = Some(obj_hit);
             }
         }
 
@@ -38,7 +38,7 @@ impl Hittable for Scene {
 }
 
 impl Hittable for &Scene {
-    fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Hit {
+    fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<Hit> {
         (*self).hit(r, t_min, t_max)
     }
 }

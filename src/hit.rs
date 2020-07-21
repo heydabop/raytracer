@@ -5,7 +5,7 @@ use std::rc::Rc;
 
 #[allow(clippy::module_name_repetitions)]
 #[derive(Debug)]
-pub struct HitData {
+pub struct Hit {
     pub point: Vec3,
     pub normal: Vec3,
     pub t: f64,
@@ -13,7 +13,7 @@ pub struct HitData {
     pub material: Rc<dyn MaterialWritable>,
 }
 
-impl PartialEq for HitData {
+impl PartialEq for Hit {
     fn eq(&self, rhs: &Self) -> bool {
         self.point == rhs.point
             && self.normal == rhs.normal
@@ -22,12 +22,6 @@ impl PartialEq for HitData {
     }
 }
 
-#[derive(Debug, PartialEq)]
-pub enum Hit {
-    Hit(HitData),
-    Miss,
-}
-
 pub trait Hittable {
-    fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Hit;
+    fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<Hit>;
 }

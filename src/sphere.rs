@@ -1,4 +1,4 @@
-use super::hit::{Hit, HitData, Hittable};
+use super::hit::{Hit, Hittable};
 use super::material::{Lambertian, MaterialWritable};
 use super::ray::Ray;
 use super::vec3::Vec3;
@@ -20,7 +20,7 @@ impl Sphere {
         }
     }
 
-    fn compute_hit(&self, r: &Ray, t: f64) -> Hit {
+    fn compute_hit(&self, r: &Ray, t: f64) -> Option<Hit> {
         let point = r.at(t);
         let mut normal = (&point - &self.center) / self.radius;
         let front_face = if r.direction.dot(&normal) > 0.0 {
@@ -30,7 +30,7 @@ impl Sphere {
         } else {
             true
         };
-        Hit::Hit(HitData {
+        Some(Hit {
             point,
             normal: normal.unit_vector(),
             t,
@@ -47,7 +47,7 @@ impl Default for Sphere {
 }
 
 impl Hittable for Sphere {
-    fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Hit {
+    fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<Hit> {
         let oc = &r.origin - &self.center;
         let a = r.direction.length_squared();
         let half_b = oc.dot(&r.direction);
@@ -66,12 +66,12 @@ impl Hittable for Sphere {
             }
         }
 
-        Hit::Miss
+        None
     }
 }
 
 impl Hittable for &Sphere {
-    fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Hit {
+    fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<Hit> {
         (*self).hit(r, t_min, t_max)
     }
 }
@@ -79,7 +79,7 @@ impl Hittable for &Sphere {
 #[cfg(test)]
 #[allow(clippy::unreadable_literal)]
 mod test {
-    use super::{Hit, HitData, Hittable, Lambertian, Ray, Rc, Sphere, Vec3};
+    use super::{Hit, Hittable, Lambertian, Ray, Rc, Sphere, Vec3};
 
     #[test]
     fn hit() {
@@ -105,7 +105,7 @@ mod test {
         };
         assert_eq!(
             s.hit(&hit_ray, 0.0, 2.0),
-            Hit::Hit(HitData {
+            Some(Hit {
                 point: Vec3 {
                     x: 0.10787389667339245,
                     y: 0.16181084501008866,
@@ -123,7 +123,7 @@ mod test {
         );
         assert_eq!(
             s.hit(&inside_hit_ray, 0.0, 1.0),
-            Hit::Hit(HitData {
+            Some(Hit {
                 point: Vec3 {
                     x: 0.0,
                     y: 0.5,
@@ -139,7 +139,7 @@ mod test {
                 material: Rc::new(Lambertian::new(Vec3::from_xyz(0.5, 0.5, 0.5))),
             })
         );
-        assert_eq!(s.hit(&hit_ray, 0.0, 0.5), Hit::Miss);
-        assert_eq!(s.hit(&miss_ray, 0.0, 10.0), Hit::Miss);
+        assert_eq!(s.hit(&hit_ray, 0.0, 0.5), None);
+        assert_eq!(s.hit(&miss_ray, 0.0, 10.0), None);
     }
 }
