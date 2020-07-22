@@ -20,7 +20,7 @@ impl Ray {
     }
 
     pub fn at(&self, t: f64) -> Vec3 {
-        &self.origin + &self.direction * t
+        self.origin + self.direction * t
     }
 
     pub fn color<T: Hittable>(&self, hittable: &T, mut rng: &mut Pcg64Mcg, depth: u16) -> Vec3 {

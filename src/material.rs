@@ -34,16 +34,16 @@ impl Lambertian {
 
 impl Material for Lambertian {
     fn scatter(&self, r_in: &Ray, mut rng: &mut Pcg64Mcg, hit: &Hit) -> Option<Scatter> {
-        let scatter_direction = &hit.normal + Vec3::random_unit_vector(&mut rng);
+        let scatter_direction = hit.normal + Vec3::random_unit_vector(&mut rng);
         let scattered_ray = Ray {
-            origin: hit.point.clone(),
+            origin: hit.point,
             direction: scatter_direction,
             time: r_in.time,
         };
 
         Some(Scatter {
             ray: scattered_ray,
-            attenuation: self.albedo.clone(),
+            attenuation: self.albedo,
         })
     }
 }
@@ -70,16 +70,16 @@ impl Metal {
 
 impl Material for Metal {
     fn scatter(&self, r_in: &Ray, mut rng: &mut Pcg64Mcg, hit: &Hit) -> Option<Scatter> {
-        let reflected = r_in.direction.unit_vector().reflect(&hit.normal);
-        if reflected.dot(&hit.normal) > 0.0 {
+        let reflected = r_in.direction.unit_vector().reflect(hit.normal);
+        if reflected.dot(hit.normal) > 0.0 {
             let scattered = Ray {
-                origin: hit.point.clone(),
+                origin: hit.point,
                 direction: reflected + Vec3::random_in_unit_sphere(&mut rng) * self.fuzz,
                 time: r_in.time,
             };
             return Some(Scatter {
                 ray: scattered,
-                attenuation: self.albedo.clone(),
+                attenuation: self.albedo,
             });
         }
 
@@ -118,12 +118,12 @@ impl Material for Dielectric {
         };
 
         let unit_direction = r_in.direction.unit_vector();
-        let cos_theta = (-&unit_direction).dot(&hit.normal).min(1.0);
+        let cos_theta = (-&unit_direction).dot(hit.normal).min(1.0);
         let sin_theta = (-cos_theta.mul_add(cos_theta, -1.0)).sqrt();
         if eta_ratio * sin_theta > 1.0 || rng.gen::<f64>() < Self::schlick(cos_theta, eta_ratio) {
-            let reflected = unit_direction.reflect(&hit.normal);
+            let reflected = unit_direction.reflect(hit.normal);
             let scattered = Ray {
-                origin: hit.point.clone(),
+                origin: hit.point,
                 direction: reflected,
                 time: r_in.time,
             };
@@ -133,9 +133,9 @@ impl Material for Dielectric {
             });
         }
 
-        let refracted = unit_direction.refract(&hit.normal, eta_ratio);
+        let refracted = unit_direction.refract(hit.normal, eta_ratio);
         let scattered = Ray {
-            origin: hit.point.clone(),
+            origin: hit.point,
             direction: refracted,
             time: r_in.time,
         };

@@ -28,14 +28,14 @@ impl MovingSphere {
     }
 
     pub fn center(&self, time: f64) -> Vec3 {
-        &self.center0
-            + (&self.center1 - &self.center0) * ((time - self.time0) / (self.time1 - self.time0))
+        self.center0
+            + (self.center1 - self.center0) * ((time - self.time0) / (self.time1 - self.time0))
     }
 
     fn compute_hit(&self, r: &Ray, t: f64) -> Option<Hit> {
         let point = r.at(t);
-        let mut normal = (&point - &self.center(r.time)) / self.radius;
-        let front_face = if r.direction.dot(&normal) > 0.0 {
+        let mut normal = (point - self.center(r.time)) / self.radius;
+        let front_face = if r.direction.dot(normal) > 0.0 {
             // ray is coming from inside the sphere
             normal = -normal;
             false
@@ -60,9 +60,9 @@ impl Default for MovingSphere {
 
 impl Hittable for MovingSphere {
     fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<Hit> {
-        let oc = &r.origin - &self.center(r.time);
+        let oc = r.origin - self.center(r.time);
         let a = r.direction.length_squared();
-        let half_b = oc.dot(&r.direction);
+        let half_b = oc.dot(r.direction);
         let c = (-self.radius).mul_add(self.radius, oc.length_squared());
         let discriminant = (-a).mul_add(c, half_b * half_b);
 

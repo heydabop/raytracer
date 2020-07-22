@@ -68,7 +68,7 @@ fn main() {
             if let Some(h) = this_last_handle {
                 let last_colors = h.join().unwrap();
                 for i in 0..thread_colors.len() {
-                    thread_colors[i] += &last_colors[i]
+                    thread_colors[i] += last_colors[i]
                 }
             }
             thread_colors
@@ -116,8 +116,8 @@ fn render_scene_slice(
 
     let mut camera = Camera::new(
         cam_center,
-        &cam_target,
-        &cam_up,
+        cam_target,
+        cam_up,
         cam_vfov,
         aspect_ratio,
         cam_aperture,
@@ -149,7 +149,7 @@ fn render_scene_slice(
                 let u = (f64::from(i) + rng.gen_range(0.0, 1.0)) / f64::from(image_width - 1);
                 let v = (f64::from(j) + rng.gen_range(0.0, 1.0)) / f64::from(image_height - 1);
                 let r = camera.ray(&mut rng, u, v);
-                pixel_color += &r.color(&scene, &mut rng, max_depth);
+                pixel_color += r.color(&scene, &mut rng, max_depth);
             }
             colors.push(pixel_color);
         }
@@ -183,11 +183,11 @@ fn random_spheres(scene_seed: u128) -> bvh::BVH {
             let y = surface_y(x, z, ground_radius + radius, ground_y);
 
             let center = Vec3::from_xyz(x, y, z);
-            if (&center - &intersection_check).length() > 0.9 {
+            if (center - intersection_check).length() > 0.9 {
                 if choose_material < 0.8 {
                     let albedo =
                         Vec3::random(&mut rng, 0.0, 1.0) * Vec3::random(&mut rng, 0.0, 1.0);
-                    let center1 = &center + Vec3::from_xyz(0.0, rng.gen_range(0.0, 0.5), 0.0);
+                    let center1 = center + Vec3::from_xyz(0.0, rng.gen_range(0.0, 0.5), 0.0);
                     scene.push(Rc::new(MovingSphere {
                         center0: center,
                         center1,

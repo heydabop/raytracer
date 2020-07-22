@@ -23,8 +23,8 @@ impl Sphere {
 
     fn compute_hit(&self, r: &Ray, t: f64) -> Option<Hit> {
         let point = r.at(t);
-        let mut normal = (&point - &self.center) / self.radius;
-        let front_face = if r.direction.dot(&normal) > 0.0 {
+        let mut normal = (point - self.center) / self.radius;
+        let front_face = if r.direction.dot(normal) > 0.0 {
             // ray is coming from inside the sphere
             normal = -normal;
             false
@@ -49,9 +49,9 @@ impl Default for Sphere {
 
 impl Hittable for Sphere {
     fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<Hit> {
-        let oc = &r.origin - &self.center;
+        let oc = r.origin - self.center;
         let a = r.direction.length_squared();
-        let half_b = oc.dot(&r.direction);
+        let half_b = oc.dot(r.direction);
         let c = (-self.radius).mul_add(self.radius, oc.length_squared());
         let discriminant = (-a).mul_add(c, half_b * half_b);
 
@@ -72,8 +72,8 @@ impl Hittable for Sphere {
 
     fn bounding_box(&self, _: f64, _: f64) -> Option<AABB> {
         Some(AABB {
-            min: &self.center - Vec3::from_xyz(self.radius, self.radius, self.radius),
-            max: &self.center + Vec3::from_xyz(self.radius, self.radius, self.radius),
+            min: self.center - Vec3::from_xyz(self.radius, self.radius, self.radius),
+            max: self.center + Vec3::from_xyz(self.radius, self.radius, self.radius),
         })
     }
 }
