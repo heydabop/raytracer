@@ -1,3 +1,4 @@
+use super::aabb::AABB;
 use super::hit::{Hit, Hittable};
 use super::material::{Lambertian, MaterialWritable};
 use super::ray::Ray;
@@ -79,11 +80,28 @@ impl Hittable for MovingSphere {
 
         None
     }
+
+    fn bounding_box(&self, t0: f64, t1: f64) -> Option<AABB> {
+        let box0 = AABB {
+            min: self.center(t0) - Vec3::from_xyz(self.radius, self.radius, self.radius),
+            max: self.center(t0) + Vec3::from_xyz(self.radius, self.radius, self.radius),
+        };
+        let box1 = AABB {
+            min: self.center(t1) - Vec3::from_xyz(self.radius, self.radius, self.radius),
+            max: self.center(t1) + Vec3::from_xyz(self.radius, self.radius, self.radius),
+        };
+
+        Some(box0.surrounding_box(&box1))
+    }
 }
 
 impl Hittable for &MovingSphere {
     fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<Hit> {
         (*self).hit(r, t_min, t_max)
+    }
+
+    fn bounding_box(&self, t0: f64, t1: f64) -> Option<AABB> {
+        (*self).bounding_box(t0, t1)
     }
 }
 

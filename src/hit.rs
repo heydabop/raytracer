@@ -1,3 +1,4 @@
+use super::aabb::AABB;
 use super::material::MaterialWritable;
 use super::ray::Ray;
 use super::vec3::Vec3;
@@ -24,4 +25,6 @@ impl PartialEq for Hit {
 
 pub trait Hittable {
     fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<Hit>;
+
+    fn bounding_box(&self, t0: f64, t1: f64) -> Option<AABB>;
 }

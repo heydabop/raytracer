@@ -2,7 +2,7 @@ use rand::Rng;
 use std::fmt;
 use std::ops;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct Vec3 {
     pub x: f64,
     pub y: f64,
@@ -325,6 +325,14 @@ impl ops::Sub for Vec3 {
 
     fn sub(self, rhs: Self) -> Self::Output {
         &self - &rhs
+    }
+}
+
+impl ops::Sub<Vec3> for &Vec3 {
+    type Output = Vec3;
+
+    fn sub(self, rhs: Vec3) -> Self::Output {
+        self - &rhs
     }
 }
 

@@ -1,21 +1,24 @@
+#![feature(new_uninit)]
+#![feature(total_cmp)]
 #![feature(clamp)]
 
+mod aabb;
+mod bvh;
 mod camera;
 mod hit;
 mod material;
 mod moving_sphere;
 mod ppm;
 mod ray;
-mod scene;
 mod sphere;
 mod vec3;
 
 use camera::Camera;
+use hit::Hittable;
 use material::{Dielectric, Lambertian, Metal};
 use moving_sphere::MovingSphere;
 use rand::prelude::*;
 use rand_pcg::Pcg64Mcg;
-use scene::Scene;
 use sphere::Sphere;
 use std::io::{self, Write};
 use std::rc::Rc;
@@ -155,11 +158,11 @@ fn render_scene_slice(
     colors
 }
 
-fn random_spheres(scene_seed: u128) -> Scene {
-    let mut scene = Scene::new();
+fn random_spheres(scene_seed: u128) -> bvh::BVH {
+    let mut scene: Vec<Rc<dyn Hittable>> = vec![];
     let ground_y = -1000.0;
     let ground_radius = 1000.0;
-    scene.add(Box::new(Sphere {
+    scene.push(Rc::new(Sphere {
         center: Vec3::from_xyz(0.0, ground_y, 0.0),
         radius: ground_radius,
         material: Rc::new(Lambertian::new(Vec3::from_xyz(0.5, 0.5, 0.5))),
@@ -185,7 +188,7 @@ fn random_spheres(scene_seed: u128) -> Scene {
                     let albedo =
                         Vec3::random(&mut rng, 0.0, 1.0) * Vec3::random(&mut rng, 0.0, 1.0);
                     let center1 = &center + Vec3::from_xyz(0.0, rng.gen_range(0.0, 0.5), 0.0);
-                    scene.add(Box::new(MovingSphere {
+                    scene.push(Rc::new(MovingSphere {
                         center0: center,
                         center1,
                         time0: 0.0,
@@ -196,13 +199,13 @@ fn random_spheres(scene_seed: u128) -> Scene {
                 } else if choose_material < 0.95 {
                     let albedo = Vec3::random(&mut rng, 0.5, 1.0);
                     let fuzz = rng.gen_range(0.0, 0.5);
-                    scene.add(Box::new(Sphere {
+                    scene.push(Rc::new(Sphere {
                         center,
                         radius,
                         material: Rc::new(Metal::new(albedo, fuzz)),
                     }));
                 } else {
-                    scene.add(Box::new(Sphere {
+                    scene.push(Rc::new(Sphere {
                         center,
                         radius,
                         material: Rc::new(Dielectric::new(1.5)),
@@ -212,12 +215,12 @@ fn random_spheres(scene_seed: u128) -> Scene {
         }
     }
 
-    scene.add(Box::new(Sphere {
+    scene.push(Rc::new(Sphere {
         center: Vec3::from_xyz(0.0, 1.0, 0.0),
         radius: 1.0,
         material: Rc::new(Dielectric::new(1.5)),
     }));
-    scene.add(Box::new(Sphere {
+    scene.push(Rc::new(Sphere {
         center: Vec3::from_xyz(
             -4.0,
             surface_y(-4.0, 0.0, ground_radius + 1.0, ground_y),
@@ -226,13 +229,13 @@ fn random_spheres(scene_seed: u128) -> Scene {
         radius: 1.0,
         material: Rc::new(Lambertian::new(Vec3::from_xyz(0.4, 0.2, 0.1))),
     }));
-    scene.add(Box::new(Sphere {
+    scene.push(Rc::new(Sphere {
         center: Vec3::from_xyz(4.0, surface_y(4.0, 0.0, ground_radius + 1.0, ground_y), 0.0),
         radius: 1.0,
         material: Rc::new(Metal::new(Vec3::from_xyz(0.7, 0.6, 0.5), 0.0)),
     }));
 
-    scene
+    bvh::BVH::new(&mut rng, scene, 0.0, 1.0)
 }
 
 fn surface_y(x: f64, z: f64, combined_radius: f64, ground_y: f64) -> f64 {
