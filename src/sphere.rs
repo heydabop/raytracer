@@ -104,14 +104,16 @@ impl Hittable for &Sphere {
 #[cfg(test)]
 #[allow(clippy::unreadable_literal)]
 mod test {
-    use super::{Hit, Hittable, Lambertian, Ray, Rc, Sphere, Vec3};
+    use super::{Hit, Hittable, Lambertian, Ray, Rc, SolidColor, Sphere, Vec3};
 
     #[test]
     fn hit() {
         let s = &Sphere {
             center: Vec3::from_xyz(0.0, 0.0, 1.0),
             radius: 0.5,
-            material: Rc::new(Lambertian::new(Vec3::from_xyz(0.5, 0.5, 0.5))),
+            material: Rc::new(Lambertian::new(Box::new(SolidColor::from_rgb(
+                0.5, 0.5, 0.5,
+            )))),
         };
         let hit_ray = Ray {
             origin: Vec3::new(),
@@ -142,8 +144,12 @@ mod test {
                     z: -0.9212610332660756
                 },
                 t: 0.5393694833669622,
+                u: 0.7133877076054168,
+                v: 0.6049005077430056,
                 front_face: true,
-                material: Rc::new(Lambertian::new(Vec3::from_xyz(0.5, 0.5, 0.5))),
+                material: Rc::new(Lambertian::new(Box::new(SolidColor::from_rgb(
+                    0.5, 0.5, 0.5
+                ))),),
             })
         );
         assert_eq!(
@@ -160,8 +166,12 @@ mod test {
                     z: 0.0,
                 },
                 t: 0.5,
+                u: 0.5,
+                v: 1.0,
                 front_face: false,
-                material: Rc::new(Lambertian::new(Vec3::from_xyz(0.5, 0.5, 0.5))),
+                material: Rc::new(Lambertian::new(Box::new(SolidColor::from_rgb(
+                    0.5, 0.5, 0.5
+                ))),),
             })
         );
         assert_eq!(s.hit(&hit_ray, 0.0, 0.5), None);

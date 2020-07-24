@@ -21,6 +21,8 @@ impl PartialEq for Hit {
         self.point == rhs.point
             && self.normal == rhs.normal
             && self.t == rhs.t
+            && self.u == rhs.u
+            && self.v == rhs.v
             && self.front_face == rhs.front_face
     }
 }
