@@ -2,6 +2,8 @@ use super::aabb::AABB;
 use super::hit::{Hit, Hittable};
 use super::material::{Lambertian, MaterialWritable};
 use super::ray::Ray;
+use super::sphere::Sphere;
+use super::texture::SolidColor;
 use super::vec3::Vec3;
 use std::rc::Rc;
 
@@ -23,7 +25,9 @@ impl MovingSphere {
             time0: 0.0,
             time1: 0.0,
             radius: 0.0,
-            material: Rc::new(Lambertian::new(Vec3::from_xyz(0.5, 0.5, 0.5))),
+            material: Rc::new(Lambertian::new(Box::new(SolidColor::from_rgb(
+                0.5, 0.5, 0.5,
+            )))),
         }
     }
 
@@ -42,10 +46,13 @@ impl MovingSphere {
         } else {
             true
         };
+        let (u, v) = Sphere::get_uv((point - self.center(r.time)) / self.radius);
         Some(Hit {
             point,
             normal: normal.unit_vector(),
             t,
+            u,
+            v,
             front_face,
             material: Rc::clone(&self.material),
         })

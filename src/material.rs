@@ -1,5 +1,6 @@
 use super::hit::Hit;
 use super::ray::Ray;
+use super::texture::TextureWritable;
 use super::vec3::Vec3;
 use rand::Rng;
 use rand_pcg::Pcg64Mcg;
@@ -22,12 +23,12 @@ pub trait MaterialWritable: Material + fmt::Debug {}
 
 #[derive(Debug)]
 pub struct Lambertian {
-    albedo: Vec3,
+    albedo: Box<dyn TextureWritable>,
 }
 
 impl Lambertian {
     #[allow(dead_code)]
-    pub fn new(albedo: Vec3) -> Self {
+    pub fn new(albedo: Box<dyn TextureWritable>) -> Self {
         Self { albedo }
     }
 }
@@ -43,7 +44,7 @@ impl Material for Lambertian {
 
         Some(Scatter {
             ray: scattered_ray,
-            attenuation: self.albedo,
+            attenuation: self.albedo.value(hit.u, hit.v, hit.point),
         })
     }
 }

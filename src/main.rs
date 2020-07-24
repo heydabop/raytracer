@@ -11,6 +11,7 @@ mod moving_sphere;
 mod ppm;
 mod ray;
 mod sphere;
+mod texture;
 mod vec3;
 
 use camera::Camera;
@@ -24,6 +25,7 @@ use std::io::{self, Write};
 use std::rc::Rc;
 use std::thread::{self, JoinHandle};
 use std::time::{SystemTime, UNIX_EPOCH};
+use texture::SolidColor;
 use vec3::Vec3;
 
 fn main() {
@@ -165,7 +167,9 @@ fn random_spheres(scene_seed: u128) -> bvh::BVH {
     scene.push(Rc::new(Sphere {
         center: Vec3::from_xyz(0.0, ground_y, 0.0),
         radius: ground_radius,
-        material: Rc::new(Lambertian::new(Vec3::from_xyz(0.5, 0.5, 0.5))),
+        material: Rc::new(Lambertian::new(Box::new(SolidColor::from_rgb(
+            0.5, 0.5, 0.5,
+        )))),
     }));
 
     let mut rng = Pcg64Mcg::new(scene_seed);
@@ -194,7 +198,7 @@ fn random_spheres(scene_seed: u128) -> bvh::BVH {
                         time0: 0.0,
                         time1: 1.0,
                         radius,
-                        material: Rc::new(Lambertian::new(albedo)),
+                        material: Rc::new(Lambertian::new(Box::new(SolidColor { color: albedo }))),
                     }));
                 } else if choose_material < 0.95 {
                     let albedo = Vec3::random(&mut rng, 0.5, 1.0);
@@ -227,7 +231,9 @@ fn random_spheres(scene_seed: u128) -> bvh::BVH {
             0.0,
         ),
         radius: 1.0,
-        material: Rc::new(Lambertian::new(Vec3::from_xyz(0.4, 0.2, 0.1))),
+        material: Rc::new(Lambertian::new(Box::new(SolidColor::from_rgb(
+            0.4, 0.2, 0.1,
+        )))),
     }));
     scene.push(Rc::new(Sphere {
         center: Vec3::from_xyz(4.0, surface_y(4.0, 0.0, ground_radius + 1.0, ground_y), 0.0),

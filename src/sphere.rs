@@ -2,7 +2,9 @@ use super::aabb::AABB;
 use super::hit::{Hit, Hittable};
 use super::material::{Lambertian, MaterialWritable};
 use super::ray::Ray;
+use super::texture::SolidColor;
 use super::vec3::Vec3;
+use std::f64::consts::PI;
 use std::rc::Rc;
 
 #[derive(Debug)]
@@ -17,8 +19,16 @@ impl Sphere {
         Self {
             center: Vec3::new(),
             radius: 0.0,
-            material: Rc::new(Lambertian::new(Vec3::from_xyz(0.5, 0.5, 0.5))),
+            material: Rc::new(Lambertian::new(Box::new(SolidColor::from_rgb(
+                0.5, 0.5, 0.5,
+            )))),
         }
+    }
+
+    pub fn get_uv(p: Vec3) -> (f64, f64) {
+        let phi = p.z.atan2(p.x);
+        let theta = p.y.asin();
+        (1.0 - (phi + PI) / (2.0 * PI), (theta + PI / 2.0) / PI)
     }
 
     fn compute_hit(&self, r: &Ray, t: f64) -> Option<Hit> {
@@ -31,10 +41,13 @@ impl Sphere {
         } else {
             true
         };
+        let (u, v) = Self::get_uv((point - self.center) / self.radius);
         Some(Hit {
             point,
             normal: normal.unit_vector(),
             t,
+            u,
+            v,
             front_face,
             material: Rc::clone(&self.material),
         })
