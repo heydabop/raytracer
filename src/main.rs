@@ -25,7 +25,7 @@ use std::io::{self, Write};
 use std::rc::Rc;
 use std::thread::{self, JoinHandle};
 use std::time::{SystemTime, UNIX_EPOCH};
-use texture::SolidColor;
+use texture::{CheckerTexture, SolidColor};
 use vec3::Vec3;
 
 fn main() {
@@ -167,9 +167,10 @@ fn random_spheres(scene_seed: u128) -> bvh::BVH {
     scene.push(Rc::new(Sphere {
         center: Vec3::from_xyz(0.0, ground_y, 0.0),
         radius: ground_radius,
-        material: Rc::new(Lambertian::new(Box::new(SolidColor::from_rgb(
-            0.5, 0.5, 0.5,
-        )))),
+        material: Rc::new(Lambertian::new(Box::new(CheckerTexture {
+            even: Box::new(SolidColor::from_rgb(0.2, 0.3, 0.1)),
+            odd: Box::new(SolidColor::from_rgb(0.9, 0.9, 0.9)),
+        }))),
     }));
 
     let mut rng = Pcg64Mcg::new(scene_seed);
