@@ -107,7 +107,7 @@ fn render_scene_slice(
 ) -> Vec<Vec3> {
     // Generating the camera, scene, and its contents thread local is much easier than sharing it, even for read only
 
-    let cam_center = Vec3::from_xyz(13.0, 2.5, 3.5);
+    let cam_center = Vec3::from_xyz(13.0, 2.0, 3.0);
     let cam_target = Vec3::from_xyz(0.0, 0.0, 0.0);
     let cam_up = Vec3::from_xyz(0.0, 1.0, 0.0);
     let cam_focus_dist = 10.0;
@@ -128,7 +128,7 @@ fn render_scene_slice(
         cam_t2,
     );
 
-    let scene = random_spheres(scene_seed);
+    let scene = two_spheres(scene_seed);
 
     let mut colors: Vec<Vec3> = Vec::with_capacity(image_width as usize * image_height as usize);
 
@@ -247,4 +247,28 @@ fn random_spheres(scene_seed: u128) -> bvh::BVH {
 
 fn surface_y(x: f64, z: f64, combined_radius: f64, ground_y: f64) -> f64 {
     ground_y + (x.mul_add(-x, z.mul_add(-z, combined_radius * combined_radius))).sqrt()
+}
+
+fn two_spheres(scene_seed: u128) -> bvh::BVH {
+    let mut rng = Pcg64Mcg::new(scene_seed);
+
+    let mut objects: Vec<Rc<dyn Hittable>> = vec![];
+
+    let checker = Rc::new(Lambertian::new(Box::new(CheckerTexture {
+        even: Box::new(SolidColor::from_rgb(0.2, 0.3, 0.1)),
+        odd: Box::new(SolidColor::from_rgb(0.9, 0.9, 0.9)),
+    })));
+
+    objects.push(Rc::new(Sphere {
+        center: Vec3::from_xyz(0.0, -10.0, 0.0),
+        radius: 10.0,
+        material: checker.clone(),
+    }));
+    objects.push(Rc::new(Sphere {
+        center: Vec3::from_xyz(0.0, 10.0, 0.0),
+        radius: 10.0,
+        material: checker,
+    }));
+
+    bvh::BVH::new(&mut rng, objects, 0.0, 1.0)
 }
